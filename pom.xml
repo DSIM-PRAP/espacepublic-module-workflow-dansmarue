@@ -11,11 +11,11 @@
   <version>1.1.5-SNAPSHOT</version>
   <packaging>lutece-plugin</packaging>
   <name>Workflow bienVU module</name>
-  <url>https://github.com/plainecommune/espacepublic-module-workflow-dansmarue</url>
+  <url>https://github.com/DSIM-PRAP/espacepublic-module-workflow-dansmarue.git</url>
   <scm>
-    <connection>scm:git:https://github.com/plainecommune/espacepublic-module-workflow-dansmarue.git</connection>
-    <developerConnection>scm:git:https://github.com/plainecommune/espacepublic-module-workflow-dansmarue.git</developerConnection>
-    <url>https://github.com/plainecommune/espacepublic-module-workflow-dansmarue</url>
+    <connection>scm:git:https://github.com/DSIM-PRAP/espacepublic-module-workflow-dansmarue.git</connection>
+    <developerConnection>scm:git:https://github.com/DSIM-PRAP/espacepublic-module-workflow-dansmarue.git</developerConnection>
+    <url>https://github.com/DSIM-PRAP/espacepublic-module-workflow-dansmarue</url>
     <tag>HEAD</tag>
   </scm>
   <properties>
