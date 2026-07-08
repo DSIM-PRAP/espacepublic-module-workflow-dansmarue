@@ -134,7 +134,7 @@ public class NotificationSignalementUserMultiContentsTask extends AbstractSignal
 
     /** The Constant PARAMETER_ISROADMAP. */
     private static final String PARAMETER_ISROADMAP = "isRoadMap";
-    
+
     /** The Constant PARAMETER_PHOTO_DONE. */
     private static final String PARAMETER_PHOTO_DONE = "photoDone";
 
@@ -270,7 +270,8 @@ public class NotificationSignalementUserMultiContentsTask extends AbstractSignal
         }
         else
         {
-            if ( !StringUtils.isEmpty( strChosenMessage ) && StringUtils.isEmpty( request.getParameter( MESSAGE_TYPO + Long.parseLong( strChosenMessage ) ) ) )
+            if (!StringUtils.isEmpty( attrChosenMessage ) || ( !StringUtils.isEmpty( strChosenMessage )
+                    && StringUtils.isEmpty( request.getParameter( MESSAGE_TYPO + Long.parseLong( strChosenMessage ) ) ) ) )
             {
                 // Ajout de l'entete
                 message = DatastoreService.getDataValue( "sitelabels.site_property.message.typologie.entete.htmlblock", "" );
@@ -435,7 +436,7 @@ public class NotificationSignalementUserMultiContentsTask extends AbstractSignal
                         }
                 }
             }
-            
+
             if(( request != null ) && ( request.getSession( ).getAttribute(PARAMETER_PHOTO_DONE) != null )) {
                 FileItem fileItem = (FileItem) request.getSession( ).getAttribute(PARAMETER_PHOTO_DONE);
 
