@@ -138,7 +138,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import fr.paris.lutece.plugins.dansmarue.business.entities.Signalement;
 import fr.paris.lutece.plugins.dansmarue.business.entities.TypeSignalement;
@@ -163,7 +163,8 @@ import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
-import net.sf.json.JSONObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import fr.paris.lutece.plugins.dansmarue.utils.DmrJson;
 
 /**
  * WebServiceSignalementTask class.
@@ -374,7 +375,7 @@ public class WebServiceSignalementTask extends AbstractSignalementTask
 
                     {
 
-                        JSONObject wsResult = _signalementWebService.getJSONResponse( bean,
+                        ObjectNode wsResult = _signalementWebService.getJSONResponse( bean,
 
                                 wsunitconfig.getUrlPrestataire( ) );
 
@@ -409,22 +410,22 @@ public class WebServiceSignalementTask extends AbstractSignalementTask
                             }
                             else
                             {
-                                if ( wsResult.containsKey( JSON_TAG_ANSWER ) && ( wsResult.getJSONObject( JSON_TAG_ANSWER ) != null ) )
+                                if ( wsResult.has( JSON_TAG_ANSWER ) && ( ((ObjectNode) wsResult.get( JSON_TAG_ANSWER )) != null ) )
                                 {
                                     webservicevalue.setValue( I18nService.getLocalizedString(
 
                                             MESSAGE_PROVIDER_WEBSERVICE_FAILURE, Locale.FRENCH )
 
-                                            + wsResult.getJSONObject( JSON_TAG_ANSWER ).getString( JSON_TAG_ERROR ) );
+                                            + ((ObjectNode) wsResult.get( JSON_TAG_ANSWER )).get( JSON_TAG_ERROR ).asText( ) );
                                 }
                                 else
-                                    if ( wsResult.containsKey( JSON_TAG_ERROR ) )
+                                    if ( wsResult.has( JSON_TAG_ERROR ) )
                                     {
                                         webservicevalue.setValue( I18nService.getLocalizedString(
 
                                                 MESSAGE_PROVIDER_WEBSERVICE_FAILURE, Locale.FRENCH )
 
-                                                + wsResult.getString( JSON_TAG_ERROR ) );
+                                                + wsResult.get( JSON_TAG_ERROR ).asText( ) );
                                     }
                                     else
                                     {
@@ -522,7 +523,7 @@ public class WebServiceSignalementTask extends AbstractSignalementTask
             webservicevalue.setIdTask( getId( ) );
             webservicevalue.setIdResourceHistory( nIdResourceHistory );
 
-            JSONObject responseJson = null;
+            ObjectNode responseJson = null;
             try
             {
                 responseJson = _signalementWebService.callWSPartnerServiceDone( signalement, wsunitconfig.getUrlPrestataire( ) );
@@ -530,8 +531,8 @@ public class WebServiceSignalementTask extends AbstractSignalementTask
             catch( BusinessException e )
             {
                 AppLogService.error( e.getMessage( ), e );
-                responseJson = new JSONObject( );
-                responseJson.accumulate( JSON_TAG_ERROR, true );
+                responseJson = DmrJson.object( );
+                DmrJson.accumulate(responseJson, JSON_TAG_ERROR, true );
             }
 
             if ( !checkResponse( signalement, responseJson ) )
@@ -561,7 +562,7 @@ public class WebServiceSignalementTask extends AbstractSignalementTask
      *            ws response
      * @return true is response is accept
      */
-    private boolean checkResponse( Signalement bean, JSONObject wsResult )
+    private boolean checkResponse( Signalement bean, ObjectNode wsResult )
 
     {
 
@@ -571,11 +572,11 @@ public class WebServiceSignalementTask extends AbstractSignalementTask
 
         {
 
-            if ( wsResult.containsKey( JSON_TAG_ANSWER ) && wsResult.getJSONObject( JSON_TAG_ANSWER ).containsKey( "id" ) )
+            if ( wsResult.has( JSON_TAG_ANSWER ) && ((ObjectNode) wsResult.get( JSON_TAG_ANSWER )).has( "id" ) )
 
             {
 
-                int idSignalementFromJson = wsResult.getJSONObject( JSON_TAG_ANSWER ).getInt( "id" );
+                int idSignalementFromJson = ((ObjectNode) wsResult.get( JSON_TAG_ANSWER )).get( "id" ).asInt( );
 
                 if ( bean.getId( ) == idSignalementFromJson )
 
