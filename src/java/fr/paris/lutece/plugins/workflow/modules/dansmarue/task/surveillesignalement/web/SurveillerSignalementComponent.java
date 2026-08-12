@@ -167,7 +167,6 @@ public class SurveillerSignalementComponent extends AbstractTaskComponent
      *            the arg 3
      * @return the task information xml
      */
-    @Override
     public String getTaskInformationXml( int arg0, HttpServletRequest arg1, Locale arg2, ITask arg3 )
     {
         return null;

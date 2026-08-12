@@ -214,7 +214,6 @@ public class ServiceFaitComponent extends AbstractTaskComponent
      *            the task
      * @return the task information xml
      */
-    @Override
     public String getTaskInformationXml( int nIdHistory, HttpServletRequest request, Locale locale, ITask task )
     {
         return null;
