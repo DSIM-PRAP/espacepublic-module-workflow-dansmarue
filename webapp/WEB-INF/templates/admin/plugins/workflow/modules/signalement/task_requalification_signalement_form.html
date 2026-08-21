@@ -174,9 +174,19 @@ $(document).ready(function() {
 
 </script>
 
+<#-- Fidelite v6 (retour BA #11c) : libelle EN FACE de la valeur + libelle bleu, comme l'ecran Consulter.
+     signalement.css n'est pas charge sur la page workflow -> on le relie (regle .control-label bleu) et on
+     met les .form-group en flex (BS5 ne fait plus flotter les col-* sans .row). Scope : #requalif-detail. -->
+<link rel="stylesheet" href="css/plugins/signalement/signalement.css" type="text/css"/>
+<style>
+#requalif-detail .form-group { display: flex; flex-wrap: wrap; align-items: baseline; margin-bottom: .4rem; }
+#requalif-detail .form-group > label { min-width: 210px; margin-bottom: 0; }
+#requalif-detail .form-group > div { flex: 1 1 auto; min-width: 0; }
+</style>
+<div id="requalif-detail">
 <div class="form-group">
 	<label class="<@labelStyle />">
-		#i18n{dansmarue.viewSignalement.numero} : 
+		#i18n{dansmarue.viewSignalement.numero} :
 	</label>
 	<div class="<@inputStyle />">
 		${signalement.prefix}${signalement.annee}${signalement.mois}${signalement.numero}
@@ -376,3 +386,4 @@ $(document).ready(function() {
 	<input type="hidden" name="next" id="next" value="${next!}" />
 	<input type="hidden" name="isRoadMap" id="isRoadMap" value="${isRoadMap!}" />
 <@modalImage/>
+</div>
