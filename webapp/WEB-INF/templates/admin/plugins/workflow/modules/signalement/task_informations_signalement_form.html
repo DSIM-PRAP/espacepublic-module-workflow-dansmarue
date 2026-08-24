@@ -1,6 +1,9 @@
-<div class="row">
-	<fieldset>
-		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+<#-- #10 : recap libelle/valeur facon v6 (libelle bleu marque + gras, a gauche de la valeur, aere).
+     Styles centralises dans signalement.css (#sf-info-recap), charge par le wrapper signalement_form.html.
+     Le marqueur #sf-info-recap ci-dessous applique ces regles. -->
+<div class="row" id="sf-info-recap">
+	<fieldset class="row">
+		<div class="col-12 col-md-6 sf-info-col">
 			<div class="form-group">
 					<label class="<@labelStyle />">
 						#i18n{module.workflow.dansmarue.workflow.informationssignalement.numero}</label>
@@ -54,7 +57,8 @@
 					</div>
 			</div>
 		</div>
-		<#assign index = 1> 
+		<#assign index = 1>
+		<div class="col-12 col-md-6">
 		<div class="form-group">
 			<#if photos?has_content>
 				<label class="<@labelStyle />" for="image">
@@ -72,7 +76,7 @@
 				</div>
 			</#if>
 			<#if isActionSF>
-					<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="left: 148px; top: 15px">
+					<div class="col-12 sf-joindre">
 						<div class="form-group">
 							<label class="<@labelStyle />" for="image">#i18n{module.workflow.dansmarue.workflow.informationssignalement.photoSF}</label>
 							<div class="<@inputStyle />"><input type="file" id="photoSF" name="photoSF" /></div>
@@ -84,6 +88,7 @@
 						</div>
 					</div>
 		        </#if>
+		</div>
 		</div>
 	</fieldset>
 </div>

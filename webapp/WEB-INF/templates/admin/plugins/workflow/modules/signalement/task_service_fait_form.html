@@ -55,7 +55,7 @@
 					<br/>
 					<div class="form-group" >
 								<div style="width:250px;float:right;">
-									<#if signalement.signaleurs[0]?has_content>
+									<#if (signalement.signaleurs[0].mail)??>
 										<input class="form-control input-sm" type="text" name="adresseEmail" value="${signalement.signaleurs[0].mail}" id="adresseEmail" />
 									<#else>
 										<input class="form-control input-sm" type="text" name="adresseEmail" value="" id="adresseEmail" />
