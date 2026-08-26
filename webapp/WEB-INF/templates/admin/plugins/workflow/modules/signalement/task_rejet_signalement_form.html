@@ -1,5 +1,9 @@
 <#if has_email_signaleur?? && has_email_signaleur == true>
-<div class="container">
+<#-- Retour BA #3 (R3-6) : les motifs de rejet sont rendus en BS4 (.custom-control.custom-checkbox,
+     mort en BS5) -> la case s'affichait AU-DESSUS du texte au lieu d'EN FACE. On lie la charte et on
+     aligne (case en face du texte, top-alignee) via une regle scopee #rejet-signalement-form. -->
+<link rel="stylesheet" href="css/plugins/signalement/signalement.css" type="text/css"/>
+<div class="container" id="rejet-signalement-form">
 	<div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			#i18n{module.workflow.dansmarue.rejet.raisons}
