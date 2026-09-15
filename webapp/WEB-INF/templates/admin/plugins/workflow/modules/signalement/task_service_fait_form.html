@@ -38,10 +38,8 @@
 							</script>
 						</div>
 						<div style="width:160px;float:right;">
-							<input class="form-control  input-append date" type="text" name="dateDePassage" id="dateDePassage" value="" />
+							<input class="form-control input-append date dmr-datepicker" type="text" name="dateDePassage" id="dateDePassage" value="" autocomplete="off" />
 							<!-- <span class="add-on"><i class="icon-cal" id="cal"></i></span> -->
-						<script src="js/jquery/plugins/ui/jquery-ui.min.js"></script>
-						<script src="js/jquery/plugins/ui/ui.datepicker-fr.js"></script>
 						</div>
 						<div style="float:right;">
 							<label class=" control-label col-xs-12 col-sm-12 col-md-12 " for="dateDePassage">
@@ -72,7 +70,10 @@
 		</div>
 		
 	</div>
-<@getDatePicker idField="dateDePassage" language="${locale!}" />	
+<#-- MPT Lutece 7 : @getDatePicker (backport core -> flatpickr) ne s initialise pas en navigateur
+     anglais, et jquery-ui n est plus style sous Tabler. Init bootstrap-datepicker via la macro
+     commune, comme les autres champs date du BO. -->
+<#include "/admin/plugins/signalement/macro/datepicker_init.html" />	
 	
 <script type="text/javascript" charset="utf-8">
 function updateChosenMessageStatus(){

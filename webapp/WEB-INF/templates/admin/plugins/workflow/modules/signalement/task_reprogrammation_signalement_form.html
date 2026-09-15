@@ -8,14 +8,16 @@
 			</div>
 			<div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
 				<div class="input-group">
-					<input class="form-control input-sm" type="text" name="datePrevueTraitement" id="datePrevueTraitement" value="${signalement.datePrevueTraitement!}"/>
-					<div class="input-group-addon">
-						<span class="glyphicon glyphicon-calendar"></span>
-					</div>
+					<input class="form-control input-sm dmr-datepicker" type="text" name="datePrevueTraitement" id="datePrevueTraitement" value="${signalement.datePrevueTraitement!}" autocomplete="off"/>
+					<span class="input-group-text dmr-datepicker-btn" role="button">
+						<i class="bi bi-calendar"></i>
+					</span>
 				</div>
-				<@getDatePickerBootstrap idField="datePrevueTraitement" language="${locale.language!}" />
 			</div>
 		</div>	
 	</div>
 </div>
 <input type="hidden" name="id" id="id" value="${signalement.id}" />
+<#-- MPT Lutece 7 : cf. task_programmation_signalement_form.html (macro backport inoperante en
+     navigateur anglais). -->
+<#include "/admin/plugins/signalement/macro/datepicker_init.html" />

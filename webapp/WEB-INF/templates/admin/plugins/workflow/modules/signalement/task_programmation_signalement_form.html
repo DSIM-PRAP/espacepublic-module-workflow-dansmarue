@@ -9,14 +9,17 @@
 			<div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
 				<div class="input-group">
 					
-					<input class="form-control input-sm" type="text" name="datePrevueTraitement" id="datePrevueTraitement"/>
-					<div class="input-group-addon">
-						<span class="glyphicon glyphicon-calendar"></span>
-					</div>
+					<input class="form-control input-sm dmr-datepicker" type="text" name="datePrevueTraitement" id="datePrevueTraitement" autocomplete="off"/>
+					<span class="input-group-text dmr-datepicker-btn" role="button">
+						<i class="bi bi-calendar"></i>
+					</span>
 				</div>
-				<@getDatePickerBootstrap idField="datePrevueTraitement" language="${locale.language!}" />
 			</div>
 		</div>
 	</div>
 </div>
 <input type="hidden" name="id" id="id" value="${signalement_id}" />
+<#-- MPT Lutece 7 : @getDatePickerBootstrap (backport core -> flatpickr) ne s'initialise pas quand le
+     navigateur de l'agent est en anglais -> le champ redevenait une simple zone de texte, sans
+     calendrier. Init bootstrap-datepicker via la macro commune (cf. datepicker_init.html). -->
+<#include "/admin/plugins/signalement/macro/datepicker_init.html" />

@@ -12,11 +12,13 @@
 				<div class="input-group">
 					
 					<input class="form-control input-sm" type="text" name="miseEnsurveillance" id="miseEnsurveillance" value="${.now?string('dd/MM/yyyy')}" readonly/>
-					<div class="input-group-addon">
-						<span class="glyphicon glyphicon-calendar"></span>
-					</div>
+					<span class="input-group-text">
+						<i class="bi bi-calendar"></i>
+					</span>
 				</div>
-				<@getDatePickerBootstrap idField="none" language="fr" />
+<#-- MPT Lutece 7 : l appel @getDatePickerBootstrap portait sur un id inexistant ("none") et la macro
+     backport (flatpickr) plante en navigateur anglais. Le champ est en lecture seule (date du jour),
+     aucun selecteur n est necessaire : appel supprime. -->
 			</div>
 		</div>
 	</div>
