@@ -59,7 +59,6 @@ import fr.paris.lutece.plugins.workflow.modules.dansmarue.task.notificationuser.
 import fr.paris.lutece.plugins.workflow.modules.dansmarue.task.notificationuser.business.NotificationSignalementUserTaskConfigDAO;
 import fr.paris.lutece.plugins.workflow.modules.dansmarue.task.notificationuser.business.NotificationUserValue;
 import fr.paris.lutece.plugins.workflow.modules.dansmarue.task.notificationuser.service.NotificationUserValueService;
-import fr.paris.lutece.plugins.workflow.modules.dansmarue.utils.WorkflowSignalementConstants;
 import fr.paris.lutece.plugins.workflow.utils.WorkflowUtils;
 import fr.paris.lutece.plugins.workflow.web.task.AbstractTaskComponent;
 import fr.paris.lutece.plugins.workflowcore.service.task.ITask;
@@ -121,9 +120,6 @@ public class NotificationUserComponent extends AbstractTaskComponent
 
     /** The Constant MARK_COMMENTAIRE. */
     private static final String MARK_COMMENTAIRE = "commentaire";
-
-    /** The Constant MARK_PRECISION. */
-    private static final String MARK_PRECISION = "precision";
 
     /** The Constant MARK_NOTIFICATION_USER_VALUE. */
     private static final String MARK_NOTIFICATION_USER_VALUE = "notification_user_value";
@@ -270,14 +266,7 @@ public class NotificationUserComponent extends AbstractTaskComponent
             emailModel.put( MARK_ALIAS_ANOMALIE, aliasType );
 
             emailModel.put( MARK_ADRESSE, signalement.getAdresses( ).get( 0 ).getAdresse( ) );
-            if ( signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) != null )
-            {
-                emailModel.put( MARK_PRECISION, signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) );
-            }
-            else
-            {
-                emailModel.put( MARK_PRECISION, "" );
-            }
+
             emailModel.put( MARK_PRIORITE, signalement.getPrioriteName( ) );
             emailModel.put( MARK_COMMENTAIRE, signalement.getCommentaire( ) );
             emailModel.put( MARK_LIEN_CONSULTATION, getLienConsultation( signalement ) );
@@ -418,10 +407,6 @@ public class NotificationUserComponent extends AbstractTaskComponent
         dto = new BaliseFreemarkerDTO( );
         dto.setNom( "Adresse de l'anomalie" );
         dto.setValeur( MARK_ADRESSE );
-        balises.add( dto );
-        dto = new BaliseFreemarkerDTO( );
-        dto.setNom( "Précision de la localisation" );
-        dto.setValeur( MARK_PRECISION );
         balises.add( dto );
         dto = new BaliseFreemarkerDTO( );
         dto.setNom( "Priorité" );

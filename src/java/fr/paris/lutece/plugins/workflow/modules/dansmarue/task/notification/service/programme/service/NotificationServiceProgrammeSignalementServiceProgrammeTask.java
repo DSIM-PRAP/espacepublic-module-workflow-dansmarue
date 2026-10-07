@@ -77,7 +77,6 @@ public class NotificationServiceProgrammeSignalementServiceProgrammeTask extends
     private static final String MARK_ADRESSE = "adresse";
     private static final String MARK_PRIORITE = "priorite";
     private static final String MARK_DESCRIPTION = "description";
-    private static final String MARK_PRECISION = "precision";
     private static final String MARK_LIEN_CONSULT = "lien";
     private static final String MARK_LIEN_SIGNALEMENT_WS = "wsSignalement";
     private static final String MARK_DATE_ENVOI = "dateEnvoi";
@@ -154,19 +153,10 @@ public class NotificationServiceProgrammeSignalementServiceProgrammeTask extends
             if ( CollectionUtils.isNotEmpty( signalement.getAdresses( ) ) )
             {
                 emailModel.put( MARK_ADRESSE, signalement.getAdresses( ).get( 0 ).getAdresse( ) );
-                if ( signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) != null )
-                {
-                    emailModel.put( MARK_PRECISION, signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) );
-                }
-                else
-                {
-                    emailModel.put( MARK_PRECISION, "" );
-                }
             }
             else
             {
                 emailModel.put( MARK_ADRESSE, "" );
-                emailModel.put( MARK_PRECISION, "" );
             }
             emailModel.put( MARK_PRIORITE, signalement.getPrioriteName( ) );
             emailModel.put( MARK_DESCRIPTION, signalement.getCommentaire( ) );

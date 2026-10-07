@@ -98,9 +98,6 @@ public class NotificationPushTask extends AbstractSignalementTask
     /** The Constant MARK_COMMENTAIRE. */
     private static final String MARK_COMMENTAIRE = "commentaire";
 
-    /** The Constant MARK_PRECISION. */
-    private static final String MARK_PRECISION = "precision";
-
     /** The Constant MARK_LIEN_CONSULTATION. */
     private static final String MARK_LIEN_CONSULTATION = "lien_consultation";
 
@@ -228,14 +225,7 @@ public class NotificationPushTask extends AbstractSignalementTask
         notifModel.put( MARK_ALIAS_MOBILE_ANOMALIE, aliasMobileType );
 
         notifModel.put( MARK_ADRESSE, signalement.getAdresses( ).get( 0 ).getAdresse( ) );
-        if ( signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) != null )
-        {
-            notifModel.put( MARK_PRECISION, signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) );
-        }
-        else
-        {
-            notifModel.put( MARK_PRECISION, "" );
-        }
+
         notifModel.put( MARK_PRIORITE, signalement.getPrioriteName( ) );
 
         notifModel.put( MARK_COMMENTAIRE, signalement.getCommentaire( ) );
