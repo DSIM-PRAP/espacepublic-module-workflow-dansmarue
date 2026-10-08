@@ -48,9 +48,9 @@ import fr.paris.lutece.plugins.dansmarue.service.ISignalementService;
 import fr.paris.lutece.plugins.dansmarue.service.IWorkflowService;
 import fr.paris.lutece.plugins.dansmarue.utils.DateUtils;
 import fr.paris.lutece.plugins.workflow.modules.dansmarue.service.TaskUtils;
+import fr.paris.lutece.plugins.workflowcore.business.resource.ResourceHistory;
 import fr.paris.lutece.plugins.workflowcore.service.provider.IProvider;
 import fr.paris.lutece.plugins.workflowcore.service.provider.InfoMarker;
-import fr.paris.lutece.plugins.workflowcore.business.resource.ResourceHistory;
 import fr.paris.lutece.portal.service.datastore.DatastoreService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
@@ -80,9 +80,6 @@ public class NotificationProvider implements IProvider
 
     /** The Constant MARK_COMMENTAIRE. */
     private static final String MARK_COMMENTAIRE = "commentaire";
-
-    /** The Constant MARK_PRECISION. */
-    private static final String MARK_PRECISION = "precision";
 
     /** The Constant MARK_LIEN_CONSULTATION. */
     private static final String MARK_LIEN_CONSULTATION = "lien_consultation";
@@ -135,9 +132,6 @@ public class NotificationProvider implements IProvider
 
     /** The Constant MARK_COMMENTAIRE_DESC. */
     private static final String MARK_COMMENTAIRE_DESC = "Commentaire";
-
-    /** The Constant MARK_PRECISION_DESC. */
-    private static final String MARK_PRECISION_DESC = "Précision de la localisation";
 
     /** The Constant MARK_LIEN_CONSULTATION_DESC. */
     private static final String MARK_LIEN_CONSULTATION_DESC = "Lien de consultation du message";
@@ -476,16 +470,6 @@ public class NotificationProvider implements IProvider
         }
         collectionInfoMarkers.add( createMarkerValues( MARK_EMAIL_USAGER, emailUsager ) );
 
-        // Précisions adresse
-        if ( _signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) != null )
-        {
-            collectionInfoMarkers.add( createMarkerValues( MARK_PRECISION, _signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) ) );
-        }
-        else
-        {
-            collectionInfoMarkers.add( createMarkerValues( MARK_PRECISION, "" ) );
-        }
-
         // Raisons rejets
         List<ObservationRejet> motifsRejet = _signalement.getObservationsRejet( );
 
@@ -511,8 +495,8 @@ public class NotificationProvider implements IProvider
         collectionInfoMarkers.add( createMarkerValues( MARK_URL_SONDAGE_DEMANDE, DatastoreService.getDataValue( URL_SONDAGE_DEMANDE, "" ) ) );
         collectionInfoMarkers.add( createMarkerValues( MARK_URL_SONDAGE_SERVICE, DatastoreService.getDataValue( URL_SONDAGE_SERVICE, "" ) ) );
 
-        String codePostal = _signalement.getAdresses( ) != null && _signalement.getAdresses( ).get( 0 ) != null
-                && _signalement.getAdresses( ).get( 0 ).getAdresse( ) != null ? TaskUtils.getCPFromAdresse( _signalement.getAdresses( ).get( 0 ).getAdresse( ) )
+        String codePostal = ( _signalement.getAdresses( ) != null ) && ( _signalement.getAdresses( ).get( 0 ) != null )
+                && ( _signalement.getAdresses( ).get( 0 ).getAdresse( ) != null ) ? TaskUtils.getCPFromAdresse( _signalement.getAdresses( ).get( 0 ).getAdresse( ) )
                         : "";
         collectionInfoMarkers.add( createMarkerValues( MARK_CP, codePostal ) );
 
@@ -540,7 +524,6 @@ public class NotificationProvider implements IProvider
         collectionInfoMarkers.add( createMarkerDescriptions( MARK_ALIAS_ANOMALIE, MARK_ALIAS_ANOMALIE_DESC ) );
         collectionInfoMarkers.add( createMarkerDescriptions( MARK_ALIAS_MOBILE_ANOMALIE, MARK_ALIAS_MOBILE_ANOMALIE_DESC ) );
         collectionInfoMarkers.add( createMarkerDescriptions( MARK_ADRESSE, MARK_ADRESSE_DESC ) );
-        collectionInfoMarkers.add( createMarkerDescriptions( MARK_PRECISION, MARK_PRECISION_DESC ) );
         collectionInfoMarkers.add( createMarkerDescriptions( MARK_PRIORITE, MARK_PRIORITE_DESC ) );
         collectionInfoMarkers.add( createMarkerDescriptions( MARK_COMMENTAIRE, MARK_COMMENTAIRE_DESC ) );
         collectionInfoMarkers.add( createMarkerDescriptions( MARK_LIEN_CONSULTATION, MARK_LIEN_CONSULTATION_DESC ) );

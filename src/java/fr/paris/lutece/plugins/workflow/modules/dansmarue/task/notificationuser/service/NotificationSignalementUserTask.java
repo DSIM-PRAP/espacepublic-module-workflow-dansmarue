@@ -106,9 +106,6 @@ public class NotificationSignalementUserTask extends AbstractSignalementTask
     /** The Constant MARK_COMMENTAIRE. */
     private static final String MARK_COMMENTAIRE = "commentaire";
 
-    /** The Constant MARK_PRECISION. */
-    private static final String MARK_PRECISION = "precision";
-
     /** The Constant MARK_LIEN_CONSULTATION. */
     private static final String MARK_LIEN_CONSULTATION = "lien_consultation";
 
@@ -256,14 +253,6 @@ public class NotificationSignalementUserTask extends AbstractSignalementTask
         if ( !signalement.getAdresses( ).isEmpty( ) )
         {
             emailModel.put( MARK_ADRESSE, signalement.getAdresses( ).get( 0 ).getAdresse( ) );
-            if ( signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) != null )
-            {
-                emailModel.put( MARK_PRECISION, signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) );
-            }
-            else
-            {
-                emailModel.put( MARK_PRECISION, "" );
-            }
         }
         else
         {

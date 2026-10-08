@@ -93,9 +93,6 @@ public class NotificationSignalementTask extends AbstractSignalementTask
     /** The Constant MARK_COMMENTAIRE. */
     private static final String MARK_COMMENTAIRE = "description";
 
-    /** The Constant MARK_PRECISION. */
-    private static final String MARK_PRECISION = "precision";
-
     /** The Constant MARK_LIEN_CONSULT. */
     private static final String MARK_LIEN_CONSULT = "lien";
 
@@ -110,7 +107,7 @@ public class NotificationSignalementTask extends AbstractSignalementTask
 
     /** The Constant MARK_EMAIL_USAGER. */
     private static final String MARK_EMAIL_USAGER = "emailUsager";
-    
+
     /** The Constant MARK_COMMENTAIRE. */
     private static final String MARK_COMMENTAIRE_AGENT = "commentaireAgent";
 
@@ -206,19 +203,11 @@ public class NotificationSignalementTask extends AbstractSignalementTask
                 if ( CollectionUtils.isNotEmpty( signalement.getAdresses( ) ) )
                 {
                     emailModel.put( MARK_ADRESSE, signalement.getAdresses( ).get( 0 ).getAdresse( ) );
-                    if ( signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) != null )
-                    {
-                        emailModel.put( MARK_PRECISION, signalement.getAdresses( ).get( 0 ).getPrecisionLocalisation( ) );
-                    }
-                    else
-                    {
-                        emailModel.put( MARK_PRECISION, "" );
-                    }
+
                 }
                 else
                 {
                     emailModel.put( MARK_ADRESSE, "" );
-                    emailModel.put( MARK_PRECISION, "" );
                 }
                 emailModel.put( MARK_PRIORITE, signalement.getPrioriteName( ) );
                 emailModel.put( MARK_COMMENTAIRE, signalement.getCommentaire( ) );
@@ -259,7 +248,7 @@ public class NotificationSignalementTask extends AbstractSignalementTask
                 {
                     emailModel.put( MARK_HEURE_ENVOI, StringUtils.EMPTY );
                 }
-                
+
                 emailModel.put( MARK_COMMENTAIRE_AGENT, signalement.getCommentaireAgentTerrain() );
 
                 List<PhotoDMR> photos = signalement.getPhotos( );
