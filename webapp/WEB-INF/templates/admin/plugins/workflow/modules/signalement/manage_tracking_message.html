@@ -25,9 +25,25 @@
 						</div>
 					</fieldset>
 				</div>
+				<div class="row">
+					<fieldset>
+						<div class="form-group">
+							<label class="<@labelStyle />" for="checkbox_arrondissement">
+								#i18n{module.workflow.dansmarue.manageTrackingMessage.villes} :
+							</label>
+							<div id="checkbox_arrondissement" class="<@inputStyle />" data-bs-toggle="buttons">
+								<#list arrondissement_list as arrondissement>
+									<label checkType="arrondissement" class="btn btn-checkbox">
+										<input type="checkbox" name="listIdArrondissementsParam" value="${arrondissement.code}"/>${arrondissement.name!}
+									</label>
+								</#list>
+							</div>
+						</div>
+					</fieldset>
+				</div>
 				<div class="form-group">
 					<div class="col-xs-12 col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6">
-						<button type="submit" class="btn btn-primary btn-sm" name="save" tabindex="3">	    	
+						<button type="submit" class="btn btn-primary btn-sm" name="save" tabindex="3">
 							<i class="bi bi-plus"></i>&nbsp;
 							#i18n{module.workflow.dansmarue.manageTrackingMessage.addEntityToList}
 						</button>
@@ -42,17 +58,23 @@
 						#i18n{module.workflow.dansmarue.manageTrackingMessage.entitiesForUser.label}
 					</th>
 					<th>
+						#i18n{module.workflow.dansmarue.manageTrackingMessage.villes}
+					</th>
+					<th>
 						#i18n{module.workflow.dansmarue.manageTrackingMessage.actions}
 					</th>
 				</tr>
-				<#if units_list_user?has_content>
-	    			<#list units_list_user as unit>
+				<#if grouped_subscriptions?has_content>
+	    			<#list grouped_subscriptions as row>
 						<tr>
 							<td>
-								${unit.label!}
+								${row.unit.label!}
 							</td>
 							<td>
-								<a class="btn btn-danger btn-sm" alt="#i18n{dansmarue.commons.supprimer}" title="#i18n{dansmarue.commons.supprimer}" href="jsp/admin/plugins/workflow/modules/signalement/DoDeleteUnitMessageTracking.jsp?idUnit=${unit.idUnit!}">
+								${row.villes!}
+							</td>
+							<td>
+								<a class="btn btn-danger btn-sm" alt="#i18n{dansmarue.commons.supprimer}" title="#i18n{dansmarue.commons.supprimer}" href="jsp/admin/plugins/workflow/modules/signalement/DoDeleteUnitMessageTracking.jsp?idUnit=${row.unit.idUnit!}">
 									<i class="bi bi-trash"></i>
 								</a>
 							</td>
@@ -81,24 +103,40 @@
 								#i18n{module.workflow.dansmarue.manageTrackingMessage.typeSignalement.label} * :
 							</label>
 							<div class="<@inputStyle />">
-								<#if type_list?size != 0> 
-							
+								<#if type_list?size != 0>
+
 								<input  class="form-control input-sm" id="typeSignalements" type="text" placeholder="" maxlength="255" oninput='initType();'>
 								<input id="typeSignalement" name="typeSignalement" type="hidden" value="">
-								<datalist id="idTypeSignalement">											
+								<datalist id="idTypeSignalement">
 									<#list type_list as type>
 										<option id="${type.code}" value="${type.name}">${type.name}</option>
 									</#list>
 								</datalist>
-										
+
 								</#if>
+							</div>
+						</div>
+					</fieldset>
+				</div>
+				<div class="row">
+					<fieldset>
+						<div class="form-group">
+							<label class="<@labelStyle />" for="checkbox_arrondissement_type">
+								#i18n{module.workflow.dansmarue.manageTrackingMessage.villes} :
+							</label>
+							<div id="checkbox_arrondissement_type" class="<@inputStyle />" data-bs-toggle="buttons">
+								<#list arrondissement_list as arrondissement>
+									<label checkType="arrondissement" class="btn btn-checkbox">
+										<input type="checkbox" name="listIdArrondissementsParam" value="${arrondissement.code}"/>${arrondissement.name!}
+									</label>
+								</#list>
 							</div>
 						</div>
 					</fieldset>
 				</div>
 				<div class="form-group">
 					<div class="col-xs-12 col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6">
-						<button type="submit" class="btn btn-primary btn-sm" name="save" tabindex="3">	    	
+						<button type="submit" class="btn btn-primary btn-sm" name="save" tabindex="3">
 							<i class="bi bi-plus"></i>&nbsp;
 							#i18n{module.workflow.dansmarue.manageTrackingMessage.addTypeSignalementToList}
 						</button>
@@ -113,17 +151,23 @@
 						#i18n{module.workflow.dansmarue.manageTrackingMessage.typeSignalementForUser.label}
 					</th>
 					<th>
+						#i18n{module.workflow.dansmarue.manageTrackingMessage.villes}
+					</th>
+					<th>
 						#i18n{module.workflow.dansmarue.manageTrackingMessage.actions}
 					</th>
 				</tr>
-				<#if type_list_user?has_content>
-	    			<#list type_list_user as type>
+				<#if grouped_type_subscriptions?has_content>
+	    			<#list grouped_type_subscriptions as row>
 						<tr>
 							<td>
-								${type.formatTypeSignalement!}
+								${row.type.formatTypeSignalement!}
 							</td>
 							<td>
-								<a class="btn btn-danger btn-sm" alt="#i18n{dansmarue.commons.supprimer}" title="#i18n{dansmarue.commons.supprimer}" href="jsp/admin/plugins/workflow/modules/signalement/DoDeleteTypeSignalementMessageTracking.jsp?idTypeSignalement=${type.id!}">
+								${row.villes!}
+							</td>
+							<td>
+								<a class="btn btn-danger btn-sm" alt="#i18n{dansmarue.commons.supprimer}" title="#i18n{dansmarue.commons.supprimer}" href="jsp/admin/plugins/workflow/modules/signalement/DoDeleteTypeSignalementMessageTracking.jsp?idTypeSignalement=${row.type.id!}">
 									<i class="bi bi-trash"></i>
 								</a>
 							</td>
@@ -150,7 +194,18 @@
 </div>
 </div>
 
+<style>
+div[data-bs-toggle="buttons"] label.btn > input[type="checkbox"],
+div[data-bs-toggle="buttons"] label.btn > input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none; }
+label.btn-checkbox.active,
+label.btn-radio.active { border-color: #0C518A; color: #0C518A; border: solid 2px; font-weight: bold; box-shadow: none; -webkit-box-shadow: none; }
+</style>
+
 <script>
+
+$(document).on("change", "label[checkType] > input[type='checkbox']", function() {
+	$(this).closest("label[checkType]").toggleClass("active", this.checked);
+});
 
 $(document).ready(function() {
 	<#if type_list?has_content && type_list?size != 0> 

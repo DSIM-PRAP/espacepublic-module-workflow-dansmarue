@@ -82,14 +82,16 @@
 			<tr>
 				<th>#i18n{module.workflow.dansmarue.task_notification_config.destinataires.entite}</td>
 				<th>#i18n{module.workflow.dansmarue.task_notification_config.destinataires.destinataires}</td>
+				<th>#i18n{module.workflow.dansmarue.manageTrackingMessage.villes}</th>
 				<th>#i18n{module.workflow.dansmarue.task_notification_config.destinataires.actions}</td>
 			</tr>
-			<#list configDTOUnit.listConfigUnit as config_unit>
+			<#list grouped_config_unit as row>
 				<tr>
-					<td>${config_unit.unit.label!}</td>
-					<td>${config_unit.destinataires!}</td>
+					<td>${row.unit.label!}</td>
+					<td>${row.destinataires!}</td>
+					<td>${row.villes!}</td>
 					<td>
-		        		<a class="btn btn-danger btn-sm" alt="#i18n{module.workflow.dansmarue.task_notification_config.destinataires.delete.alt}" href="jsp/admin/plugins/workflow/modules/signalement/ConfirmDeleteNotificationSignalementTaskUnit.jsp?id_task=${config_unit.idTask}&id_unit=${config_unit.unit.idUnit}"> 
+		        		<a class="btn btn-danger btn-sm" alt="#i18n{module.workflow.dansmarue.task_notification_config.destinataires.delete.alt}" href="jsp/admin/plugins/workflow/modules/signalement/ConfirmDeleteNotificationSignalementTaskUnit.jsp?id_task=${row.idTask!}&id_unit=${row.unit.idUnit!}">
 							<i class="bi bi-trash"></i>
 		        		</a>
 					</td>
@@ -138,14 +140,16 @@
 			<tr>
 				<th>#i18n{module.workflow.dansmarue.task_notification_config.destinataires.typeSignalement}</th>
 				<th>#i18n{module.workflow.dansmarue.task_notification_config.destinataires.destinataires}</th>
+				<th>#i18n{module.workflow.dansmarue.manageTrackingMessage.villes}</th>
 				<th>#i18n{module.workflow.dansmarue.task_notification_config.destinataires.actions}</th>
 			</tr>
-			<#list configDTOType.listConfigUnit as config_unit>
+			<#list grouped_config_type as row>
 				<tr>
-					<td>${config_unit.typeSignalement.formatTypeSignalement!}</td>
-					<td>${config_unit.destinataires!}</td>
+					<td>${row.type.formatTypeSignalement!}</td>
+					<td>${row.destinataires!}</td>
+					<td>${row.villes!}</td>
 					<td>
-		        		<a class="btn btn-danger btn-sm" alt="#i18n{module.workflow.dansmarue.task_notification_config.destinataires.delete.alt}" href="jsp/admin/plugins/workflow/modules/signalement/ConfirmDeleteNotificationSignalementTaskUnit.jsp?id_task=${config_unit.idTask}&id_type_signalement=${config_unit.typeSignalement.id}"> 
+		        		<a class="btn btn-danger btn-sm" alt="#i18n{module.workflow.dansmarue.task_notification_config.destinataires.delete.alt}" href="jsp/admin/plugins/workflow/modules/signalement/ConfirmDeleteNotificationSignalementTaskUnit.jsp?id_task=${row.idTask!}&id_type_signalement=${row.type.id!}">
 							<i class="bi bi-trash"></i>
 		        		</a>
 					</td>

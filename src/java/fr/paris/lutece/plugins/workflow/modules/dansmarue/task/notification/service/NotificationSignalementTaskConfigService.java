@@ -253,6 +253,36 @@ public class NotificationSignalementTaskConfigService
     }
 
     /**
+     * Return all configurations for a given task id and unit id (multiple rows when id_arrondissement is used).
+     *
+     * @param nIdTask
+     *            the task id
+     * @param nIdUnit
+     *            the unit id
+     * @return the list of configurations
+     */
+    public List<NotificationSignalementTaskConfigUnit> findUnitsByIdTaskAndIdUnit( int nIdTask, int nIdUnit )
+    {
+        Plugin plugin = SignalementUtils.getPlugin( );
+        return _notificationSignalementTaskConfigUnitDAO.findByIdUnitAndIdTask( nIdUnit, nIdTask, plugin );
+    }
+
+    /**
+     * Return all configurations for a given task id and type signalement id (multiple rows when id_arrondissement is used).
+     *
+     * @param nIdTask
+     *            the task id
+     * @param nIdTypeSignalement
+     *            the type signalement id
+     * @return the list of configurations
+     */
+    public List<NotificationSignalementTaskConfigUnit> findTypesByIdTaskAndIdType( int nIdTask, int nIdTypeSignalement )
+    {
+        Plugin plugin = SignalementUtils.getPlugin( );
+        return _notificationSignalementTaskConfigUnitDAO.findAllByIdTaskAndIdTypeSignalement( nIdTask, nIdTypeSignalement, plugin );
+    }
+
+    /**
      * Return a configuration for a given task id and unit id.
      *
      * @param nIdTask

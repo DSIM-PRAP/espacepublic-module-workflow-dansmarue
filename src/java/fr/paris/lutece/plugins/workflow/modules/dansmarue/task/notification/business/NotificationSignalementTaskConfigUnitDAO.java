@@ -33,6 +33,7 @@
  */
 package fr.paris.lutece.plugins.workflow.modules.dansmarue.task.notification.business;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class NotificationSignalementTaskConfigUnitDAO
 {
 
     /** The Constant SQL_SELECT_IDTASK_DEST_IDUNIT. */
-    private static final String SQL_SELECT_IDTASK_DEST_IDUNIT = "SELECT id_task,destinataires,id_unit ";
+    private static final String SQL_SELECT_IDTASK_DEST_IDUNIT = "SELECT id_task,destinataires,id_unit,id_arrondissement";
 
     /** The Constant SQL_QUERY_FIND_BY_PRIMARY_KEY. */
     private static final String SQL_QUERY_FIND_BY_PRIMARY_KEY = SQL_SELECT_IDTASK_DEST_IDUNIT
@@ -59,16 +60,16 @@ public class NotificationSignalementTaskConfigUnitDAO
             + " FROM signalement_workflow_notification_config_unit WHERE id_task=? AND id_type_signalement=?";
 
     /** The Constant SQL_QUERY_FIND_BY_ID_TASK. */
-    private static final String SQL_QUERY_FIND_BY_ID_TASK = SQL_SELECT_IDTASK_DEST_IDUNIT
+    private static final String SQL_QUERY_FIND_BY_ID_TASK = "SELECT id_task,destinataires,id_unit,id_arrondissement"
             + " FROM signalement_workflow_notification_config_unit WHERE id_task=? and id_type_signalement is null";
 
     /** The Constant SQL_QUERY_FIND_BY_ID_TASK_WITH_TYPE_SIGNALEMENT. */
-    private static final String SQL_QUERY_FIND_BY_ID_TASK_WITH_TYPE_SIGNALEMENT = "SELECT swncu.id_task,destinataires,swncu.id_type_signalement, sts.libelle , sts.fk_id_type_signalement, sts.fk_id_unit"
+    private static final String SQL_QUERY_FIND_BY_ID_TASK_WITH_TYPE_SIGNALEMENT = "SELECT swncu.id_task,destinataires,swncu.id_type_signalement, sts.libelle , sts.fk_id_type_signalement, sts.fk_id_unit, swncu.id_arrondissement"
             + " FROM signalement_workflow_notification_config_unit swncu, signalement_type_signalement sts WHERE sts.id_type_signalement = swncu.id_type_signalement and swncu.id_task=? and swncu.id_unit is null";
 
     /** The Constant SQL_QUERY_INSERT. */
     private static final String SQL_QUERY_INSERT = "INSERT INTO signalement_workflow_notification_config_unit "
-            + "(id_task,destinataires,id_unit) VALUES(?,?,?)";
+            + "(id_task,destinataires,id_unit,id_arrondissement) VALUES(?,?,?,?)";
 
     /** The Constant SQL_QUERY_UPDATE. */
     private static final String SQL_QUERY_UPDATE = "UPDATE signalement_workflow_notification_config_unit "
@@ -89,15 +90,62 @@ public class NotificationSignalementTaskConfigUnitDAO
             + " FROM signalement_workflow_notification_config_unit WHERE id_unit=? and id_task=?";
 
     /** The Constant SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT. */
-    private static final String SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT = "SELECT id_task,destinataires,id_type_signalement "
+    private static final String SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT = "SELECT id_task,destinataires,id_type_signalement,id_arrondissement"
             + " FROM signalement_workflow_notification_config_unit WHERE id_type_signalement=?";
 
     /** The Constant SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT. */
     private static final String SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT = "DELETE FROM signalement_workflow_notification_config_unit WHERE id_task=? AND id_type_signalement=?";
 
+    /** The Constant SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT_NULL. */
+    private static final String SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT_NULL =
+            "DELETE FROM signalement_workflow_notification_config_unit WHERE id_task=? AND id_type_signalement=? AND id_arrondissement IS NULL";
+
+    /** The Constant SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT. */
+    private static final String SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT =
+            "DELETE FROM signalement_workflow_notification_config_unit WHERE id_task=? AND id_type_signalement=? AND id_arrondissement=?";
+
+    /** The Constant SQL_QUERY_FIND_BY_ID_UNIT_AND_ARRONDISSEMENT_NULL. */
+    private static final String SQL_QUERY_FIND_BY_ID_UNIT_AND_ARRONDISSEMENT_NULL = SQL_SELECT_IDTASK_DEST_IDUNIT
+            + ",id_arrondissement FROM signalement_workflow_notification_config_unit WHERE id_unit=? AND id_arrondissement IS NULL";
+
+    /** The Constant SQL_QUERY_FIND_BY_ID_UNIT_AND_ARRONDISSEMENT. */
+    private static final String SQL_QUERY_FIND_BY_ID_UNIT_AND_ARRONDISSEMENT = SQL_SELECT_IDTASK_DEST_IDUNIT
+            + ",id_arrondissement FROM signalement_workflow_notification_config_unit WHERE id_unit=? AND id_arrondissement=?";
+
+    /** The Constant SQL_QUERY_UPDATE_DESTINATAIRES_WITH_ARRONDISSEMENT_NULL. */
+    private static final String SQL_QUERY_UPDATE_DESTINATAIRES_WITH_ARRONDISSEMENT_NULL =
+            "UPDATE signalement_workflow_notification_config_unit SET destinataires=? WHERE id_task=? AND id_unit=? AND id_arrondissement IS NULL";
+
+    /** The Constant SQL_QUERY_UPDATE_DESTINATAIRES_WITH_ARRONDISSEMENT. */
+    private static final String SQL_QUERY_UPDATE_DESTINATAIRES_WITH_ARRONDISSEMENT =
+            "UPDATE signalement_workflow_notification_config_unit SET destinataires=? WHERE id_task=? AND id_unit=? AND id_arrondissement=?";
+
+    /** The Constant SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT_NULL. */
+    private static final String SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT_NULL =
+            "SELECT id_task,destinataires,id_type_signalement,id_arrondissement"
+            + " FROM signalement_workflow_notification_config_unit WHERE id_type_signalement=? AND id_arrondissement IS NULL";
+
+    /** The Constant SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT. */
+    private static final String SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT =
+            "SELECT id_task,destinataires,id_type_signalement,id_arrondissement"
+            + " FROM signalement_workflow_notification_config_unit WHERE id_type_signalement=? AND id_arrondissement=?";
+
+    /** The Constant SQL_QUERY_UPDATE_DESTINATAIRES_WITH_TYPE_AND_ARRONDISSEMENT_NULL. */
+    private static final String SQL_QUERY_UPDATE_DESTINATAIRES_WITH_TYPE_AND_ARRONDISSEMENT_NULL =
+            "UPDATE signalement_workflow_notification_config_unit SET destinataires=? WHERE id_task=? AND id_type_signalement=? AND id_arrondissement IS NULL";
+
+    /** The Constant SQL_QUERY_UPDATE_DESTINATAIRES_WITH_TYPE_AND_ARRONDISSEMENT. */
+    private static final String SQL_QUERY_UPDATE_DESTINATAIRES_WITH_TYPE_AND_ARRONDISSEMENT =
+            "UPDATE signalement_workflow_notification_config_unit SET destinataires=? WHERE id_task=? AND id_type_signalement=? AND id_arrondissement=?";
+
+    /** The Constant SQL_QUERY_FIND_ALL_BY_ID_TASK_AND_ID_TYPE_SIGNALEMENT. */
+    private static final String SQL_QUERY_FIND_ALL_BY_ID_TASK_AND_ID_TYPE_SIGNALEMENT =
+            "SELECT id_task,destinataires,id_type_signalement,id_arrondissement"
+            + " FROM signalement_workflow_notification_config_unit WHERE id_task=? AND id_type_signalement=?";
+
     /** The Constant SQL_QUERY_INSERT_WITH_TYPE_SIGNALEMENT. */
     private static final String SQL_QUERY_INSERT_WITH_TYPE_SIGNALEMENT = "INSERT INTO signalement_workflow_notification_config_unit "
-            + "(id_task,destinataires,id_type_signalement) VALUES(?,?,?)";
+            + "(id_task,destinataires,id_type_signalement,id_arrondissement) VALUES(?,?,?,?)";
 
     /** The Constant SQL_QUERY_UPDATE_WITH_TYPE_SIGNALEMENT. */
     private static final String SQL_QUERY_UPDATE_WITH_TYPE_SIGNALEMENT = "UPDATE signalement_workflow_notification_config_unit "
@@ -119,6 +167,14 @@ public class NotificationSignalementTaskConfigUnitDAO
         daoUtil.setInt( ++nPos, config.getIdTask( ) );
         daoUtil.setString( ++nPos, config.getDestinataires( ) );
         daoUtil.setInt( ++nPos, config.getUnit( ).getIdUnit( ) );
+        if ( config.getIdArrondissement( ) != null )
+        {
+            daoUtil.setInt( ++nPos, config.getIdArrondissement( ) );
+        }
+        else
+        {
+            daoUtil.setNull( ++nPos, Types.INTEGER );
+        }
 
         daoUtil.executeUpdate( );
         daoUtil.close( );
@@ -140,6 +196,14 @@ public class NotificationSignalementTaskConfigUnitDAO
         daoUtil.setInt( ++nPos, config.getIdTask( ) );
         daoUtil.setString( ++nPos, config.getDestinataires( ) );
         daoUtil.setInt( ++nPos, config.getTypeSignalement( ).getId( ) );
+        if ( config.getIdArrondissement( ) != null )
+        {
+            daoUtil.setInt( ++nPos, config.getIdArrondissement( ) );
+        }
+        else
+        {
+            daoUtil.setNull( ++nPos, Types.INTEGER );
+        }
 
         daoUtil.executeUpdate( );
         daoUtil.close( );
@@ -226,6 +290,7 @@ public class NotificationSignalementTaskConfigUnitDAO
             Unit unit = new Unit( );
             unit.setIdUnit( daoUtil.getInt( ++nPos ) );
             config.setUnit( unit );
+            config.setIdArrondissement( daoUtil.getInt( ++nPos ) );
         }
 
         daoUtil.close( );
@@ -266,6 +331,7 @@ public class NotificationSignalementTaskConfigUnitDAO
             Unit unit = new Unit( );
             unit.setIdUnit( daoUtil.getInt( ++nPos ) );
             config.setUnit( unit );
+            config.setIdArrondissement( daoUtil.getInt( ++nPos ) );
         }
 
         daoUtil.close( );
@@ -300,6 +366,7 @@ public class NotificationSignalementTaskConfigUnitDAO
             Unit unit = new Unit( );
             unit.setIdUnit( daoUtil.getInt( ++nPos ) );
             config.setUnit( unit );
+            config.setIdArrondissement( daoUtil.getObject( ++nPos, Integer.class ) );
 
             listConfigs.add( config );
         }
@@ -343,6 +410,7 @@ public class NotificationSignalementTaskConfigUnitDAO
             type.setUnit( unit );
             type.setTypeSignalementParent( typeParent );
             config.setTypeSignalement( type );
+            config.setIdArrondissement( daoUtil.getObject( ++nPos, Integer.class ) );
 
             listConfigs.add( config );
         }
@@ -379,6 +447,7 @@ public class NotificationSignalementTaskConfigUnitDAO
             Unit unit = new Unit( );
             unit.setIdUnit( daoUtil.getInt( ++nPos ) );
             config.setUnit( unit );
+            config.setIdArrondissement(  daoUtil.getInt( ++nPos ) );
 
             listConfigs.add( config );
         }
@@ -418,6 +487,7 @@ public class NotificationSignalementTaskConfigUnitDAO
             Unit unit = new Unit( );
             unit.setIdUnit( daoUtil.getInt( ++nPos ) );
             config.setUnit( unit );
+            config.setIdArrondissement(  daoUtil.getInt( ++nPos ) );
 
             listConfigs.add( config );
         }
@@ -454,7 +524,119 @@ public class NotificationSignalementTaskConfigUnitDAO
             TypeSignalement type = new TypeSignalement( );
             type.setId( daoUtil.getInt( ++nPos ) );
             config.setTypeSignalement( type );
+            config.setIdArrondissement( daoUtil.getObject( ++nPos, Integer.class ) );
 
+            listConfigs.add( config );
+        }
+
+        daoUtil.close( );
+
+        return listConfigs;
+    }
+
+    /**
+     * Find by id type signalement and id arrondissement.
+     *
+     * @param nIdTypeSignalement
+     *            the type signalement id
+     * @param nIdArrondissement
+     *            the arrondissement id (null matches rows with id_arrondissement IS NULL)
+     * @param plugin
+     *            the plugin
+     * @return the list of notificationSignalement task configuration
+     */
+    public List<NotificationSignalementTaskConfigUnit> findByIdTypeSignalementAndIdArrondissement( int nIdTypeSignalement, Integer nIdArrondissement,
+            Plugin plugin )
+    {
+        List<NotificationSignalementTaskConfigUnit> listConfigs = new ArrayList<>( );
+        String sql = ( nIdArrondissement == null ) ? SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT_NULL
+                : SQL_QUERY_FIND_BY_ID_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT;
+        DAOUtil daoUtil = new DAOUtil( sql, plugin );
+        daoUtil.setInt( 1, nIdTypeSignalement );
+        if ( nIdArrondissement != null )
+        {
+            daoUtil.setInt( 2, nIdArrondissement );
+        }
+        daoUtil.executeQuery( );
+
+        int nPos = 0;
+
+        while ( daoUtil.next( ) )
+        {
+            nPos = 0;
+            NotificationSignalementTaskConfigUnit config = new NotificationSignalementTaskConfigUnit( );
+            config.setIdTask( daoUtil.getInt( ++nPos ) );
+            config.setDestinataires( daoUtil.getString( ++nPos ) );
+            TypeSignalement type = new TypeSignalement( );
+            type.setId( daoUtil.getInt( ++nPos ) );
+            config.setTypeSignalement( type );
+            config.setIdArrondissement( daoUtil.getObject( ++nPos, Integer.class ) );
+            listConfigs.add( config );
+        }
+
+        daoUtil.close( );
+
+        return listConfigs;
+    }
+
+    /**
+     * Update destinataires filtering on id_task, id_type_signalement and id_arrondissement.
+     *
+     * @param config
+     *            the task configuration (idArrondissement null = match IS NULL rows)
+     * @param plugin
+     *            the plugin
+     */
+    public void updateDestinatairesWithTypeAndArrondissement( NotificationSignalementTaskConfigUnit config, Plugin plugin )
+    {
+        String sql = ( config.getIdArrondissement( ) == null ) ? SQL_QUERY_UPDATE_DESTINATAIRES_WITH_TYPE_AND_ARRONDISSEMENT_NULL
+                : SQL_QUERY_UPDATE_DESTINATAIRES_WITH_TYPE_AND_ARRONDISSEMENT;
+        DAOUtil daoUtil = new DAOUtil( sql, plugin );
+
+        int nPos = 0;
+        daoUtil.setString( ++nPos, config.getDestinataires( ) );
+        daoUtil.setInt( ++nPos, config.getIdTask( ) );
+        daoUtil.setInt( ++nPos, config.getTypeSignalement( ).getId( ) );
+        if ( config.getIdArrondissement( ) != null )
+        {
+            daoUtil.setInt( ++nPos, config.getIdArrondissement( ) );
+        }
+
+        daoUtil.executeUpdate( );
+        daoUtil.close( );
+    }
+
+    /**
+     * Find all rows for a given id task and id type signalement (all arrondissements).
+     *
+     * @param nIdTask
+     *            the task id
+     * @param nIdTypeSignalement
+     *            the type signalement id
+     * @param plugin
+     *            the plugin
+     * @return the list of notificationSignalement task configuration
+     */
+    public List<NotificationSignalementTaskConfigUnit> findAllByIdTaskAndIdTypeSignalement( int nIdTask, int nIdTypeSignalement, Plugin plugin )
+    {
+        List<NotificationSignalementTaskConfigUnit> listConfigs = new ArrayList<>( );
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_ALL_BY_ID_TASK_AND_ID_TYPE_SIGNALEMENT, plugin );
+        daoUtil.setInt( 1, nIdTask );
+        daoUtil.setInt( 2, nIdTypeSignalement );
+        daoUtil.executeQuery( );
+
+        int nPos = 0;
+
+        while ( daoUtil.next( ) )
+        {
+            nPos = 0;
+            NotificationSignalementTaskConfigUnit config = new NotificationSignalementTaskConfigUnit( );
+            config.setIdTask( daoUtil.getInt( ++nPos ) );
+            config.setDestinataires( daoUtil.getString( ++nPos ) );
+            TypeSignalement type = new TypeSignalement( );
+            type.setId( daoUtil.getInt( ++nPos ) );
+            config.setTypeSignalement( type );
+            config.setIdArrondissement( daoUtil.getObject( ++nPos, Integer.class ) );
             listConfigs.add( config );
         }
 
@@ -503,6 +685,106 @@ public class NotificationSignalementTaskConfigUnitDAO
 
         daoUtil.setInt( nIndex++, nIdTask );
         daoUtil.setInt( nIndex, nIdTypeSignalement );
+        daoUtil.executeUpdate( );
+        daoUtil.close( );
+    }
+
+    /**
+     * Delete by type signalement and id arrondissement (deletes only the specific row).
+     *
+     * @param nIdTask
+     *            the task id
+     * @param nIdTypeSignalement
+     *            the report type id
+     * @param nIdArrondissement
+     *            the arrondissement id (null deletes rows with id_arrondissement IS NULL)
+     * @param plugin
+     *            the plugin
+     */
+    public void deleteByTypeSignalementAndArrondissement( int nIdTask, int nIdTypeSignalement, Integer nIdArrondissement, Plugin plugin )
+    {
+        String sql = ( nIdArrondissement == null ) ? SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT_NULL
+                : SQL_QUERY_DELETE_BY_TYPE_SIGNALEMENT_AND_ARRONDISSEMENT;
+        DAOUtil daoUtil = new DAOUtil( sql, plugin );
+
+        int nIndex = 1;
+        daoUtil.setInt( nIndex++, nIdTask );
+        daoUtil.setInt( nIndex++, nIdTypeSignalement );
+        if ( nIdArrondissement != null )
+        {
+            daoUtil.setInt( nIndex, nIdArrondissement );
+        }
+        daoUtil.executeUpdate( );
+        daoUtil.close( );
+    }
+
+    /**
+     * Find by id unit and id arrondissement.
+     *
+     * @param nIdUnit
+     *            the unit id
+     * @param nIdArrondissement
+     *            the arrondissement id (null matches rows with id_arrondissement IS NULL)
+     * @param plugin
+     *            the plugin
+     * @return the list of notificationSignalement task configuration
+     */
+    public List<NotificationSignalementTaskConfigUnit> findByIdUnitAndIdArrondissement( int nIdUnit, Integer nIdArrondissement, Plugin plugin )
+    {
+        List<NotificationSignalementTaskConfigUnit> listConfigs = new ArrayList<>( );
+        String sql = ( nIdArrondissement == null ) ? SQL_QUERY_FIND_BY_ID_UNIT_AND_ARRONDISSEMENT_NULL : SQL_QUERY_FIND_BY_ID_UNIT_AND_ARRONDISSEMENT;
+        DAOUtil daoUtil = new DAOUtil( sql, plugin );
+        daoUtil.setInt( 1, nIdUnit );
+        if ( nIdArrondissement != null )
+        {
+            daoUtil.setInt( 2, nIdArrondissement );
+        }
+        daoUtil.executeQuery( );
+
+        int nPos = 0;
+
+        while ( daoUtil.next( ) )
+        {
+            nPos = 0;
+            NotificationSignalementTaskConfigUnit config = new NotificationSignalementTaskConfigUnit( );
+            config.setIdTask( daoUtil.getInt( ++nPos ) );
+            config.setDestinataires( daoUtil.getString( ++nPos ) );
+            Unit unit = new Unit( );
+            unit.setIdUnit( daoUtil.getInt( ++nPos ) );
+            config.setUnit( unit );
+            config.setIdArrondissement( daoUtil.getObject( ++nPos, Integer.class ) );
+            listConfigs.add( config );
+        }
+
+        daoUtil.close( );
+
+        return listConfigs;
+    }
+
+    /**
+     * Update destinataires filtering on id_unit, id_task and id_arrondissement.
+     *
+     * @param config
+     *            the task configuration (idArrondissement null = match IS NULL rows)
+     * @param plugin
+     *            the plugin
+     */
+    public void updateDestinatairesWithArrondissement( NotificationSignalementTaskConfigUnit config, Plugin plugin )
+    {
+        String sql = ( config.getIdArrondissement( ) == null )
+                ? SQL_QUERY_UPDATE_DESTINATAIRES_WITH_ARRONDISSEMENT_NULL
+                        : SQL_QUERY_UPDATE_DESTINATAIRES_WITH_ARRONDISSEMENT;
+        DAOUtil daoUtil = new DAOUtil( sql, plugin );
+
+        int nPos = 0;
+        daoUtil.setString( ++nPos, config.getDestinataires( ) );
+        daoUtil.setInt( ++nPos, config.getIdTask( ) );
+        daoUtil.setInt( ++nPos, config.getUnit( ).getIdUnit( ) );
+        if ( config.getIdArrondissement( ) != null )
+        {
+            daoUtil.setInt( ++nPos, config.getIdArrondissement( ) );
+        }
+
         daoUtil.executeUpdate( );
         daoUtil.close( );
     }

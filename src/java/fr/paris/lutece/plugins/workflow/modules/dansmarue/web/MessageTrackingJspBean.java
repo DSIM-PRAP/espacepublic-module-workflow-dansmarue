@@ -38,8 +38,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +49,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import fr.paris.lutece.plugins.dansmarue.business.entities.Arrondissement;
 import fr.paris.lutece.plugins.dansmarue.business.entities.TypeSignalement;
+import fr.paris.lutece.plugins.dansmarue.service.IArrondissementService;
 import fr.paris.lutece.plugins.dansmarue.service.ITypeSignalementService;
 import fr.paris.lutece.plugins.dansmarue.service.IWorkflowService;
 import fr.paris.lutece.plugins.dansmarue.service.role.SignalementViewRoleService;
@@ -102,6 +106,18 @@ public class MessageTrackingJspBean extends AbstractJspBean
     /** The Constant MARK_TYPE_LIST_USER. */
     private static final String MARK_TYPE_LIST_USER = "type_list_user";
 
+    /** The Constant MARK_ARRONDISSEMENT_LIST. */
+    private static final String MARK_ARRONDISSEMENT_LIST = "arrondissement_list";
+
+    /** The Constant MARK_GROUPED_SUBSCRIPTIONS. */
+    private static final String MARK_GROUPED_SUBSCRIPTIONS = "grouped_subscriptions";
+
+    /** The Constant MARK_ARRONDISSEMENT_MAP. */
+    private static final String MARK_ARRONDISSEMENT_MAP = "arrondissement_map";
+
+    /** The Constant MARK_GROUPED_TYPE_SUBSCRIPTIONS. */
+    private static final String MARK_GROUPED_TYPE_SUBSCRIPTIONS = "grouped_type_subscriptions";
+
     /** The Constant MESSAGE_ERROR_NO_UNIT_SELECTED. */
     // MESSAGES
     private static final String MESSAGE_ERROR_NO_UNIT_SELECTED = "module.workflow.dansmarue.message.error.noUnitSelected";
@@ -135,6 +151,9 @@ public class MessageTrackingJspBean extends AbstractJspBean
     /** The Constant PARAMETER_UNIT_ID_UNIT. */
     private static final String PARAMETER_UNIT_ID_UNIT = "unit.idUnit";
 
+    /** The Constant PARAMETER_ID_ARRONDISSEMENTS. */
+    private static final String PARAMETER_ID_ARRONDISSEMENTS = "listIdArrondissementsParam";
+
     /** The Constant PARAMETER_NO_UNIT_SELECTED. */
     private static final String PARAMETER_NO_UNIT_SELECTED = "-1";
 
@@ -158,6 +177,9 @@ public class MessageTrackingJspBean extends AbstractJspBean
 
     /** The type signalement service. */
     private transient ITypeSignalementService _typeSignalementService = SpringContextService.getBean( "typeSignalementService" );
+
+    /** The arrondissement service. */
+    private transient IArrondissementService _arrondissementService = SpringContextService.getBean( "signalement.arrondissementService" );
 
     /** The signalement view role service. */
     private transient SignalementViewRoleService _signalementViewRoleService = SpringContextService.getBean( "signalement.signalementViewRoleService" );
@@ -242,13 +264,82 @@ public class MessageTrackingJspBean extends AbstractJspBean
         ReferenceList listeTypes = ListUtils.toReferenceList( types, "id", "formatTypeSignalement", "", false );
         model.put( MARK_TYPE_LIST, listeTypes );
 
-        // Get the report types already linked to the user email (notification enabled)
-        // IMPORTANT : Cf workflow-signalement.properties to see the id task
-        List<TypeSignalement> listTypesUser = getTypeSignalementLinkedToMailUser( mailCurrentUser );
-        sortListTypeSignalementAlphabetical( listTypesUser );
-        model.put( MARK_TYPE_LIST_USER, listTypesUser );
-
         /******* TYPES *******/
+
+        /******* ARRONDISSEMENTS *******/
+
+        List<Arrondissement> listArrondissements = _arrondissementService.getAllArrondissement( );
+        ReferenceList listeArrondissements = ListUtils.toReferenceList( listArrondissements, "id", "numero", null );
+        model.put( MARK_ARRONDISSEMENT_LIST, listeArrondissements );
+
+        Map<String, String> arrondissementMap = new HashMap<>( );
+        for ( Arrondissement arrondissement : listArrondissements )
+        {
+            arrondissementMap.put( arrondissement.getId( ).toString( ), arrondissement.getNumero( ) );
+        }
+        model.put( MARK_ARRONDISSEMENT_MAP, arrondissementMap );
+
+        List<NotificationSignalementTaskConfigUnit> listSubscriptionsUser = getSubscriptionsLinkedToMailUser( mailCurrentUser );
+
+        // Group subscriptions by unit, concatenating city names
+        LinkedHashMap<Integer, Unit> unitByIdMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, List<String>> villesByUnitMap = new LinkedHashMap<>( );
+        for ( NotificationSignalementTaskConfigUnit sub : listSubscriptionsUser )
+        {
+            int idUnit = sub.getUnit( ).getIdUnit( );
+            unitByIdMap.putIfAbsent( idUnit, sub.getUnit( ) );
+            villesByUnitMap.putIfAbsent( idUnit, new ArrayList<>( ) );
+            if ( sub.getIdArrondissement( ) == null )
+            {
+                villesByUnitMap.get( idUnit ).add( null );
+            }
+            else
+            {
+                villesByUnitMap.get( idUnit ).add( arrondissementMap.get( sub.getIdArrondissement( ).toString( ) ) );
+            }
+        }
+        List<Map<String, Object>> groupedSubscriptions = new ArrayList<>( );
+        for ( Map.Entry<Integer, Unit> entry : unitByIdMap.entrySet( ) )
+        {
+            Map<String, Object> row = new HashMap<>( );
+            row.put( "unit", entry.getValue( ) );
+            List<String> villes = villesByUnitMap.get( entry.getKey( ) );
+            row.put( "villes", villes.contains( null ) ? "Toutes" : String.join( ", ", villes ) );
+            groupedSubscriptions.add( row );
+        }
+        model.put( MARK_GROUPED_SUBSCRIPTIONS, groupedSubscriptions );
+
+        // Group type subscriptions by type, concatenating city names
+        List<NotificationSignalementTaskConfigUnit> listTypeConfigUser = getTypeConfigLinkedToMailUser( mailCurrentUser );
+        LinkedHashMap<Integer, TypeSignalement> typeByIdMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, List<String>> villesByTypeMap = new LinkedHashMap<>( );
+        for ( NotificationSignalementTaskConfigUnit sub : listTypeConfigUser )
+        {
+            int idType = sub.getTypeSignalement( ).getId( );
+            typeByIdMap.putIfAbsent( idType, sub.getTypeSignalement( ) );
+            villesByTypeMap.putIfAbsent( idType, new ArrayList<>( ) );
+            if ( sub.getIdArrondissement( ) == null )
+            {
+                villesByTypeMap.get( idType ).add( null );
+            }
+            else
+            {
+                villesByTypeMap.get( idType ).add( arrondissementMap.get( sub.getIdArrondissement( ).toString( ) ) );
+            }
+        }
+        List<Map<String, Object>> groupedTypeSubscriptions = new ArrayList<>( );
+        for ( Map.Entry<Integer, TypeSignalement> entry : typeByIdMap.entrySet( ) )
+        {
+            int idType = entry.getKey( );
+            Map<String, Object> row = new HashMap<>( );
+            row.put( "type", entry.getValue( ) );
+            List<String> villes = villesByTypeMap.get( idType );
+            row.put( "villes", villes.contains( null ) ? "Toutes" : String.join( ", ", villes ) );
+            groupedTypeSubscriptions.add( row );
+        }
+        model.put( MARK_GROUPED_TYPE_SUBSCRIPTIONS, groupedTypeSubscriptions );
+
+        /******* ARRONDISSEMENTS *******/
 
         HtmlTemplate t = AppTemplateService.getTemplate( TEMPLATE_MANAGE_TRACKING_MESSAGE, getLocale( ), model );
 
@@ -312,6 +403,42 @@ public class MessageTrackingJspBean extends AbstractJspBean
     }
 
     /**
+     * Get distinct (unit, arrondissement) subscriptions linked to the user's email.
+     *
+     * @param mailCurrentUser
+     *            the user mail
+     * @return the list of subscriptions
+     */
+    private List<NotificationSignalementTaskConfigUnit> getSubscriptionsLinkedToMailUser( String mailCurrentUser )
+    {
+        List<Long> idsTask = _signalementWorkflowService.findIdTaskByTaskKey( TASK_NOTIFICATION_SIGNALEMENT_NAME );
+        List<NotificationSignalementTaskConfigUnit> listSubscriptions = new ArrayList<>( );
+
+        for ( Long idTask : idsTask )
+        {
+            List<NotificationSignalementTaskConfigUnit> lstConfigUnit = _notificationSignalementTaskConfigUnitService.findByIdTask( idTask.intValue( ),
+                    getPlugin( ) );
+
+            for ( NotificationSignalementTaskConfigUnit configUnit : lstConfigUnit )
+            {
+                if ( configUnit.getDestinataires( ).contains( mailCurrentUser ) )
+                {
+                    boolean exists = listSubscriptions.stream( ).anyMatch( sub ->
+                        sub.getUnit( ).getIdUnit( ) == configUnit.getUnit( ).getIdUnit( )
+                        && Objects.equals( sub.getIdArrondissement( ), configUnit.getIdArrondissement( ) )
+                    );
+                    if ( !exists )
+                    {
+                        configUnit.setUnit( _unitService.getUnit( configUnit.getUnit( ).getIdUnit( ), false ) );
+                        listSubscriptions.add( configUnit );
+                    }
+                }
+            }
+        }
+        return listSubscriptions;
+    }
+
+    /**
      * Get the report types linked to the user's email.
      *
      * @param mailCurrentUser
@@ -354,6 +481,45 @@ public class MessageTrackingJspBean extends AbstractJspBean
             }
         }
         return listTypesUser;
+    }
+
+    /**
+     * Get distinct (type, arrondissement) subscriptions linked to the user's email.
+     *
+     * @param mailCurrentUser
+     *            the user mail
+     * @return the list of type config subscriptions
+     */
+    private List<NotificationSignalementTaskConfigUnit> getTypeConfigLinkedToMailUser( String mailCurrentUser )
+    {
+        List<Long> idsTask = _signalementWorkflowService.findIdTaskByTaskKey( TASK_NOTIFICATION_SIGNALEMENT_NAME );
+        List<NotificationSignalementTaskConfigUnit> listTypeConfig = new ArrayList<>( );
+
+        for ( Long idTask : idsTask )
+        {
+            List<NotificationSignalementTaskConfigUnit> lstConfigType = _notificationSignalementTaskConfigUnitService
+                    .findByIdTaskWithTypeSignalement( idTask.intValue( ), getPlugin( ) );
+
+            for ( NotificationSignalementTaskConfigUnit configType : lstConfigType )
+            {
+                if ( configType.getDestinataires( ).contains( mailCurrentUser ) )
+                {
+                    boolean exists = listTypeConfig.stream( ).anyMatch( sub ->
+                        sub.getTypeSignalement( ).getId( ).intValue( ) == configType.getTypeSignalement( ).getId( ).intValue( )
+                        && Objects.equals( sub.getIdArrondissement( ), configType.getIdArrondissement( ) )
+                    );
+                    if ( !exists )
+                    {
+                        // Enrich TypeSignalement with full parent hierarchy so formatTypeSignalement displays correctly
+                        TypeSignalement enrichedType = _typeSignalementService
+                                .getTypeSignalementByIdWithParentsWithoutUnit( configType.getTypeSignalement( ).getId( ) );
+                        configType.setTypeSignalement( enrichedType );
+                        listTypeConfig.add( configType );
+                    }
+                }
+            }
+        }
+        return listTypeConfig;
     }
 
     /**
@@ -453,13 +619,14 @@ public class MessageTrackingJspBean extends AbstractJspBean
                 if ( strNewRecipients.equals( StringUtils.EMPTY ) )
                 {
                     // US06-RCI02 : if the recipient string becomes empty -> delete the line in database
-                    _notificationSignalementTaskConfigUnitService.deleteByTypeSignalement( configType.getIdTask( ), nIdTypeToDelete, getPlugin( ) );
+                    _notificationSignalementTaskConfigUnitService.deleteByTypeSignalementAndArrondissement( configType.getIdTask( ), nIdTypeToDelete,
+                            configType.getIdArrondissement( ), getPlugin( ) );
                 }
                 else
                 {
                     // else just update by removing the current user mail
                     configType.setDestinataires( strNewRecipients );
-                    _notificationSignalementTaskConfigUnitService.updateWithTypeSignalement( configType, getPlugin( ) );
+                    _notificationSignalementTaskConfigUnitService.updateDestinatairesWithTypeAndArrondissement( configType, getPlugin( ) );
                 }
             }
 
@@ -517,43 +684,58 @@ public class MessageTrackingJspBean extends AbstractJspBean
                 }
                 else
                 {
-                    // get all the config where the email must be added
-                    List<NotificationSignalementTaskConfigUnit> listConfigUnit = _notificationSignalementTaskConfigUnitService.findByIdUnit( nIdUnit,
-                            getPlugin( ) );
+                    // Determine which arrondissements the user selected
+                    String [ ] selectedArrondissementsParam = request.getParameterValues( PARAMETER_ID_ARRONDISSEMENTS );
+                    int totalArrondissements = _arrondissementService.getAllArrondissement( ).size( );
 
-                    if ( listConfigUnit.isEmpty( ) )
+                    List<Integer> listIdArrondissements = new ArrayList<>( );
+                    if ( selectedArrondissementsParam == null || selectedArrondissementsParam.length == 0
+                            || selectedArrondissementsParam.length == totalArrondissements )
                     {
-                        List<Long> idsTask = _signalementWorkflowService.findIdTaskByTaskKey( TASK_NOTIFICATION_SIGNALEMENT_NAME );
-                        List<Long> idTaskExclude = Arrays.asList( ID_TASK_NOTIFICATION_EXCLUDE.split( "," ) ).stream( ).map( str -> Long.valueOf( str ) )
-                                .collect( Collectors.toList( ) );
-                        idsTask.removeAll( idTaskExclude );
-                        for ( Long idTask : idsTask )
-                        {
-                            // create new line(s) in database
-                            NotificationSignalementTaskConfigUnit configUnit = new NotificationSignalementTaskConfigUnit( );
-                            configUnit.setIdTask( idTask.intValue( ) );
-                            configUnit.setDestinataires( mailCurrentUser );
-                            configUnit.setUnit( _unitService.getUnit( nIdUnit, true ) );
-                            _notificationSignalementTaskConfigUnitService.insert( configUnit, getPlugin( ) );
-                        }
+                        // No selection or all cities selected → single row with id_arrondissement = null
+                        listIdArrondissements.add( null );
                     }
                     else
                     {
-                        // add the email in line that already exists (format of destinataires : email1@mail.com;email2@mail.com;email3@mail.com)
-                        for ( NotificationSignalementTaskConfigUnit configUnit : listConfigUnit )
+                        for ( String strId : selectedArrondissementsParam )
                         {
-                            String [ ] listRecipient = configUnit.getDestinataires( ).split( ";" );
-                            List<String> listNewRecipient = new ArrayList<>( );
+                            listIdArrondissements.add( Integer.parseInt( strId ) );
+                        }
+                    }
 
-                            Collections.addAll( listNewRecipient, listRecipient );
+                    List<Long> idsTask = _signalementWorkflowService.findIdTaskByTaskKey( TASK_NOTIFICATION_SIGNALEMENT_NAME );
+                    List<Long> idTaskExclude = Arrays.asList( ID_TASK_NOTIFICATION_EXCLUDE.split( "," ) ).stream( ).map( str -> Long.valueOf( str ) )
+                            .collect( Collectors.toList( ) );
+                    idsTask.removeAll( idTaskExclude );
 
-                            listNewRecipient.add( mailCurrentUser );
+                    for ( Integer idArrondissement : listIdArrondissements )
+                    {
+                        List<NotificationSignalementTaskConfigUnit> listConfigUnit =
+                                _notificationSignalementTaskConfigUnitService.findByIdUnitAndIdArrondissement( nIdUnit, idArrondissement, getPlugin( ) );
 
-                            String strNewRecipients = StringUtils.join( listNewRecipient, ";" );
-
-                            configUnit.setDestinataires( strNewRecipients );
-                            _notificationSignalementTaskConfigUnitService.update( configUnit, getPlugin( ) );
-
+                        if ( listConfigUnit.isEmpty( ) )
+                        {
+                            // Create new row(s) in database
+                            for ( Long idTask : idsTask )
+                            {
+                                NotificationSignalementTaskConfigUnit configUnit = new NotificationSignalementTaskConfigUnit( );
+                                configUnit.setIdTask( idTask.intValue( ) );
+                                configUnit.setDestinataires( mailCurrentUser );
+                                configUnit.setUnit( _unitService.getUnit( nIdUnit, true ) );
+                                configUnit.setIdArrondissement( idArrondissement );
+                                _notificationSignalementTaskConfigUnitService.insert( configUnit, getPlugin( ) );
+                            }
+                        }
+                        else
+                        {
+                            // Append email to existing rows (format: email1@mail.com;email2@mail.com)
+                            for ( NotificationSignalementTaskConfigUnit configUnit : listConfigUnit )
+                            {
+                                List<String> listNewRecipient = new ArrayList<>( Arrays.asList( configUnit.getDestinataires( ).split( ";" ) ) );
+                                listNewRecipient.add( mailCurrentUser );
+                                configUnit.setDestinataires( StringUtils.join( listNewRecipient, ";" ) );
+                                _notificationSignalementTaskConfigUnitService.updateDestinatairesWithArrondissement( configUnit, getPlugin( ) );
+                            }
                         }
                     }
 
@@ -591,71 +773,70 @@ public class MessageTrackingJspBean extends AbstractJspBean
             }
             else
             {
-
-                // if the selected unit is already in the list -> alert
                 int nIdTypeSignalement = Integer.parseInt( strIdTypeSignalement );
                 AdminUser adminUser = AdminUserService.getAdminUser( request );
                 String mailCurrentUser = adminUser.getEmail( );
-                boolean alreadyInList = false;
 
-                List<TypeSignalement> listTypes = getTypeSignalementLinkedToMailUser( mailCurrentUser );
+                // Determine which arrondissements the user selected
+                String [ ] selectedArrondissementsParam = request.getParameterValues( PARAMETER_ID_ARRONDISSEMENTS );
+                int totalArrondissements = _arrondissementService.getAllArrondissement( ).size( );
 
-                for ( TypeSignalement type : listTypes )
+                List<Integer> listIdArrondissements = new ArrayList<>( );
+                if ( selectedArrondissementsParam == null || selectedArrondissementsParam.length == 0
+                        || selectedArrondissementsParam.length == totalArrondissements )
                 {
-                    if ( type.getId( ) == nIdTypeSignalement )
-                    {
-                        alreadyInList = true;
-                    }
-                }
-
-                if ( alreadyInList )
-                {
-                    url = AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_TYPE_ALREADY_SELECTED, AdminMessage.TYPE_STOP );
+                    // No selection or all cities selected → single row with id_arrondissement = null
+                    listIdArrondissements.add( null );
                 }
                 else
                 {
-                    // get all the config where the email must be added
-                    List<NotificationSignalementTaskConfigUnit> listConfigType = _notificationSignalementTaskConfigUnitService
-                            .findByIdTypeSignalement( nIdTypeSignalement, getPlugin( ) );
+                    for ( String strId : selectedArrondissementsParam )
+                    {
+                        listIdArrondissements.add( Integer.parseInt( strId ) );
+                    }
+                }
+
+                List<Long> idsTask = _signalementWorkflowService.findIdTaskByTaskKey( TASK_NOTIFICATION_SIGNALEMENT_NAME );
+                List<Long> idTaskExclude = Arrays.asList( ID_TASK_NOTIFICATION_EXCLUDE.split( "," ) ).stream( ).map( str -> Long.valueOf( str ) )
+                        .collect( Collectors.toList( ) );
+                idsTask.removeAll( idTaskExclude );
+
+                for ( Integer idArrondissement : listIdArrondissements )
+                {
+                    List<NotificationSignalementTaskConfigUnit> listConfigType =
+                            _notificationSignalementTaskConfigUnitService.findByIdTypeSignalementAndIdArrondissement( nIdTypeSignalement, idArrondissement,
+                                    getPlugin( ) );
 
                     if ( listConfigType.isEmpty( ) )
                     {
-                        // create new line(s) in database
-                        List<Long> idsTask = _signalementWorkflowService.findIdTaskByTaskKey( TASK_NOTIFICATION_SIGNALEMENT_NAME );
-                        List<Long> idTaskExclude = Arrays.asList( ID_TASK_NOTIFICATION_EXCLUDE.split( "," ) ).stream( ).map( str -> Long.valueOf( str ) )
-                                .collect( Collectors.toList( ) );
-                        idsTask.removeAll( idTaskExclude );
-
+                        // Create new row(s) in database
                         for ( Long idTask : idsTask )
                         {
                             NotificationSignalementTaskConfigUnit configType = new NotificationSignalementTaskConfigUnit( );
                             configType.setIdTask( idTask.intValue( ) );
                             configType.setDestinataires( mailCurrentUser );
                             configType.setTypeSignalement( _typeSignalementService.getTypeSignalementByIdWithParentsWithoutUnit( nIdTypeSignalement ) );
+                            configType.setIdArrondissement( idArrondissement );
                             _notificationSignalementTaskConfigUnitService.insertWithTypeSignalement( configType, getPlugin( ) );
                         }
                     }
                     else
                     {
-                        // add the email in line that already exists (format of destinataires : email1@mail.com;email2@mail.com;email3@mail.com)
+                        // Append email to existing rows
                         for ( NotificationSignalementTaskConfigUnit configType : listConfigType )
                         {
-                            String [ ] listRecipient = configType.getDestinataires( ).split( ";" );
-                            List<String> listNewRecipient = new ArrayList<>( );
-
-                            Collections.addAll( listNewRecipient, listRecipient );
-                            listNewRecipient.add( mailCurrentUser );
-
-                            String strNewRecipients = StringUtils.join( listNewRecipient, ";" );
-
-                            configType.setDestinataires( strNewRecipients );
-                            _notificationSignalementTaskConfigUnitService.updateWithTypeSignalement( configType, getPlugin( ) );
-
+                            if ( !configType.getDestinataires( ).contains( mailCurrentUser ) )
+                            {
+                                List<String> listNewRecipient = new ArrayList<>( Arrays.asList( configType.getDestinataires( ).split( ";" ) ) );
+                                listNewRecipient.add( mailCurrentUser );
+                                configType.setDestinataires( StringUtils.join( listNewRecipient, ";" ) );
+                                _notificationSignalementTaskConfigUnitService.updateDestinatairesWithTypeAndArrondissement( configType, getPlugin( ) );
+                            }
                         }
                     }
-
-                    url = doGoBack( request );
                 }
+
+                url = doGoBack( request );
             }
         }
 
