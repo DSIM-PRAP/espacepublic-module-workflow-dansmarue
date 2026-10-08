@@ -237,4 +237,80 @@ public class NotificationSignalementTaskConfigUnitService
     {
         _dao.deleteByTypeSignalement( nIdTask, nIdTypeSignalement, plugin );
     }
+
+    /**
+     * Find by id unit and id arrondissement.
+     *
+     * @param nIdUnit
+     *            the unit id
+     * @param nIdArrondissement
+     *            the arrondissement id (null matches rows with id_arrondissement IS NULL)
+     * @param plugin
+     *            the plugin
+     * @return the list of NotificationSignalementTaskConfigUnit
+     */
+    public List<NotificationSignalementTaskConfigUnit> findByIdUnitAndIdArrondissement( int nIdUnit, Integer nIdArrondissement, Plugin plugin )
+    {
+        return _dao.findByIdUnitAndIdArrondissement( nIdUnit, nIdArrondissement, plugin );
+    }
+
+    /**
+     * Update destinataires filtering on id_unit, id_task and id_arrondissement.
+     *
+     * @param config
+     *            the task configuration
+     * @param plugin
+     *            the plugin
+     */
+    public void updateDestinatairesWithArrondissement( NotificationSignalementTaskConfigUnit config, Plugin plugin )
+    {
+        _dao.updateDestinatairesWithArrondissement( config, plugin );
+    }
+
+    /**
+     * Find by id type signalement and id arrondissement.
+     *
+     * @param nIdTypeSignalement
+     *            the type signalement id
+     * @param nIdArrondissement
+     *            the arrondissement id (null matches rows with id_arrondissement IS NULL)
+     * @param plugin
+     *            the plugin
+     * @return the list of NotificationSignalementTaskConfigUnit
+     */
+    public List<NotificationSignalementTaskConfigUnit> findByIdTypeSignalementAndIdArrondissement( int nIdTypeSignalement, Integer nIdArrondissement,
+            Plugin plugin )
+    {
+        return _dao.findByIdTypeSignalementAndIdArrondissement( nIdTypeSignalement, nIdArrondissement, plugin );
+    }
+
+    /**
+     * Update destinataires filtering on id_task, id_type_signalement and id_arrondissement.
+     *
+     * @param config
+     *            the task configuration
+     * @param plugin
+     *            the plugin
+     */
+    public void updateDestinatairesWithTypeAndArrondissement( NotificationSignalementTaskConfigUnit config, Plugin plugin )
+    {
+        _dao.updateDestinatairesWithTypeAndArrondissement( config, plugin );
+    }
+
+    /**
+     * Delete by type signalement and id arrondissement (deletes only the specific row).
+     *
+     * @param nIdTask
+     *            the task id
+     * @param nIdTypeSignalement
+     *            the report type id
+     * @param nIdArrondissement
+     *            the arrondissement id (null deletes rows with id_arrondissement IS NULL)
+     * @param plugin
+     *            the plugin
+     */
+    public void deleteByTypeSignalementAndArrondissement( int nIdTask, int nIdTypeSignalement, Integer nIdArrondissement, Plugin plugin )
+    {
+        _dao.deleteByTypeSignalementAndArrondissement( nIdTask, nIdTypeSignalement, nIdArrondissement, plugin );
+    }
 }

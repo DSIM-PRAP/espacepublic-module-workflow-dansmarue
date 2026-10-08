@@ -36,6 +36,8 @@ package fr.paris.lutece.plugins.workflow.modules.dansmarue.task.notification.web
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,7 +51,9 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
+import fr.paris.lutece.plugins.dansmarue.business.entities.Arrondissement;
 import fr.paris.lutece.plugins.dansmarue.business.entities.TypeSignalement;
+import fr.paris.lutece.plugins.dansmarue.service.IArrondissementService;
 import fr.paris.lutece.plugins.dansmarue.service.ISignalementService;
 import fr.paris.lutece.plugins.dansmarue.service.ITypeSignalementService;
 import fr.paris.lutece.plugins.dansmarue.utils.ListUtils;
@@ -143,6 +147,15 @@ public class NotificationComponent extends AbstractTaskComponent
 
     /** The Constant MARK_TYPE_LIST. */
     private static final String MARK_TYPE_LIST = "type_list";
+
+    /** The Constant MARK_GROUPED_CONFIG_UNIT. */
+    private static final String MARK_GROUPED_CONFIG_UNIT = "grouped_config_unit";
+
+    /** The Constant MARK_GROUPED_CONFIG_TYPE. */
+    private static final String MARK_GROUPED_CONFIG_TYPE = "grouped_config_type";
+
+    /** The Constant MARK_ARRONDISSEMENT_MAP. */
+    private static final String MARK_ARRONDISSEMENT_MAP = "arrondissement_map";
 
     /** The Constant PARAMETER_ID_TASK. */
     // PARAMETERS
@@ -243,6 +256,11 @@ public class NotificationComponent extends AbstractTaskComponent
     @Inject
     @Named( "signalement.notificationSignalementTaskConfigUnitService" )
     private NotificationSignalementTaskConfigUnitService _notificationSignalementTaskConfigUnitService;
+
+    /** The arrondissement service. */
+    @Inject
+    @Named( "signalement.arrondissementService" )
+    private IArrondissementService _arrondissementService;
 
     /**
      * Gets the display task form.
@@ -356,6 +374,107 @@ public class NotificationComponent extends AbstractTaskComponent
         dto.setValeur( MARK_COMMENTAIRE_AGENT );
         balises.add( dto );
         model.put( MARK_BALISES, balises );
+
+        // Build arrondissement map (id -> name)
+        List<Arrondissement> listArrondissements = _arrondissementService.getAllArrondissement( );
+        Map<String, String> arrondissementMap = new HashMap<>( );
+        for ( Arrondissement arr : listArrondissements )
+        {
+            arrondissementMap.put( arr.getId( ).toString( ), arr.getNumero( ) );
+        }
+        model.put( MARK_ARRONDISSEMENT_MAP, arrondissementMap );
+
+        // Group configDTOUnit.listConfigUnit by unit (one row per unit)
+        LinkedHashMap<Integer, Unit> unitByIdMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, List<String>> villesByUnitMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, LinkedHashSet<String>> destinatairesByUnitMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, Integer> idTaskByUnitMap = new LinkedHashMap<>( );
+
+        for ( NotificationSignalementTaskConfigUnit sub : configDTOUnit.getListConfigUnit( ) )
+        {
+            int idUnit = sub.getUnit( ).getIdUnit( );
+            unitByIdMap.putIfAbsent( idUnit, sub.getUnit( ) );
+            villesByUnitMap.putIfAbsent( idUnit, new ArrayList<>( ) );
+            destinatairesByUnitMap.putIfAbsent( idUnit, new LinkedHashSet<>( ) );
+            idTaskByUnitMap.putIfAbsent( idUnit, sub.getIdTask( ) );
+
+            if ( sub.getIdArrondissement( ) == null )
+            {
+                villesByUnitMap.get( idUnit ).add( null );
+            }
+            else
+            {
+                villesByUnitMap.get( idUnit ).add( arrondissementMap.get( sub.getIdArrondissement( ).toString( ) ) );
+            }
+
+            if ( sub.getDestinataires( ) != null )
+            {
+                for ( String email : sub.getDestinataires( ).split( ";" ) )
+                {
+                    destinatairesByUnitMap.get( idUnit ).add( email.trim( ) );
+                }
+            }
+        }
+
+        List<Map<String, Object>> groupedConfigUnit = new ArrayList<>( );
+        for ( Map.Entry<Integer, Unit> entry : unitByIdMap.entrySet( ) )
+        {
+            int idUnit = entry.getKey( );
+            Map<String, Object> row = new HashMap<>( );
+            row.put( "unit", entry.getValue( ) );
+            row.put( "idTask", idTaskByUnitMap.get( idUnit ) );
+            List<String> villes = villesByUnitMap.get( idUnit );
+            row.put( "villes", villes.contains( null ) ? "Toutes" : String.join( ", ", villes ) );
+            row.put( "destinataires", String.join( ";", destinatairesByUnitMap.get( idUnit ) ) );
+            groupedConfigUnit.add( row );
+        }
+        model.put( MARK_GROUPED_CONFIG_UNIT, groupedConfigUnit );
+
+        // Group configDTOType.listConfigUnit by type (one row per type)
+        LinkedHashMap<Integer, TypeSignalement> typeByIdMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, List<String>> villesByTypeMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, LinkedHashSet<String>> destinatairesByTypeMap = new LinkedHashMap<>( );
+        LinkedHashMap<Integer, Integer> idTaskByTypeMap = new LinkedHashMap<>( );
+
+        for ( NotificationSignalementTaskConfigUnit sub : configDTOType.getListConfigUnit( ) )
+        {
+            int idType = sub.getTypeSignalement( ).getId( );
+            typeByIdMap.putIfAbsent( idType, sub.getTypeSignalement( ) );
+            villesByTypeMap.putIfAbsent( idType, new ArrayList<>( ) );
+            destinatairesByTypeMap.putIfAbsent( idType, new LinkedHashSet<>( ) );
+            idTaskByTypeMap.putIfAbsent( idType, sub.getIdTask( ) );
+
+            if ( sub.getIdArrondissement( ) == null )
+            {
+                villesByTypeMap.get( idType ).add( null );
+            }
+            else
+            {
+                villesByTypeMap.get( idType ).add( arrondissementMap.get( sub.getIdArrondissement( ).toString( ) ) );
+            }
+
+            if ( sub.getDestinataires( ) != null )
+            {
+                for ( String email : sub.getDestinataires( ).split( ";" ) )
+                {
+                    destinatairesByTypeMap.get( idType ).add( email.trim( ) );
+                }
+            }
+        }
+
+        List<Map<String, Object>> groupedConfigType = new ArrayList<>( );
+        for ( Map.Entry<Integer, TypeSignalement> entry : typeByIdMap.entrySet( ) )
+        {
+            int idType = entry.getKey( );
+            Map<String, Object> row = new HashMap<>( );
+            row.put( "type", entry.getValue( ) );
+            row.put( "idTask", idTaskByTypeMap.get( idType ) );
+            List<String> villes = villesByTypeMap.get( idType );
+            row.put( "villes", villes.contains( null ) ? "Toutes" : String.join( ", ", villes ) );
+            row.put( "destinataires", String.join( ";", destinatairesByTypeMap.get( idType ) ) );
+            groupedConfigType.add( row );
+        }
+        model.put( MARK_GROUPED_CONFIG_TYPE, groupedConfigType );
 
         HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_TASK_NOTIFICATION_SIGNALEMENT_CONFIG, locale, model );
         return template.getHtml( );

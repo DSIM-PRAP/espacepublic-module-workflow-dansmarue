@@ -349,47 +349,56 @@ public class NotificationSignalementTask extends AbstractSignalementTask
             }
         }
 
+        Long idArrondissementSignalement = ( signalement.getArrondissement( ) != null ) ? signalement.getArrondissement( ).getId( ) : null;
+
         for ( Unit unitToNotify : unitsToNotifySector )
         {
-            // récupérer la configUnit, puis le(s) destinataire(s)
-            NotificationSignalementTaskConfigUnit configUnit = _notificationSignalementTaskConfigService.findUnitByPrimaryKey( getId( ),
-                    unitToNotify.getIdUnit( ) );
+            List<NotificationSignalementTaskConfigUnit> configUnits = _notificationSignalementTaskConfigService
+                    .findUnitsByIdTaskAndIdUnit( getId( ), unitToNotify.getIdUnit( ) );
 
-            if ( configUnit != null )
+            for ( NotificationSignalementTaskConfigUnit configUnit : configUnits )
             {
-                String strDestinataires = configUnit.getDestinataires( );
-                String [ ] tabDestinataires = strDestinataires.split( ";" );
-                for ( String email : tabDestinataires )
+                boolean villeMatch = configUnit.getIdArrondissement( ) == null
+                        || ( idArrondissementSignalement != null
+                                && configUnit.getIdArrondissement( ).longValue( ) == idArrondissementSignalement.longValue( ) );
+
+                if ( villeMatch )
                 {
-                    if ( !resultList.contains( email.trim( ) ) )
+                    String [ ] tabDestinataires = configUnit.getDestinataires( ).split( ";" );
+                    for ( String email : tabDestinataires )
                     {
-                        resultList.add( email.trim( ) );
+                        if ( !resultList.contains( email.trim( ) ) )
+                        {
+                            resultList.add( email.trim( ) );
+                        }
                     }
                 }
             }
-
         }
 
         for ( TypeSignalement typeToNotify : typesToNotify )
         {
-            // récupérer la configType, puis le(s) destinataire(s)
-            NotificationSignalementTaskConfigUnit configType = _notificationSignalementTaskConfigService.findByIdTypeSignalement( getId( ),
-                    typeToNotify.getId( ) );
+            List<NotificationSignalementTaskConfigUnit> configTypes = _notificationSignalementTaskConfigService
+                    .findTypesByIdTaskAndIdType( getId( ), typeToNotify.getId( ) );
 
-            if ( configType != null )
+            for ( NotificationSignalementTaskConfigUnit configType : configTypes )
             {
-                String strDestinataires = configType.getDestinataires( );
-                String [ ] tabDestinataires = strDestinataires.split( ";" );
-                for ( String email : tabDestinataires )
+                boolean villeMatchType = configType.getIdArrondissement( ) == null
+                        || ( idArrondissementSignalement != null
+                                && configType.getIdArrondissement( ).longValue( ) == idArrondissementSignalement.longValue( ) );
+
+                if ( villeMatchType )
                 {
-                    if ( !resultList.contains( email.trim( ) ) )
+                    String [ ] tabDestinataires = configType.getDestinataires( ).split( ";" );
+                    for ( String email : tabDestinataires )
                     {
-                        resultList.add( email.trim( ) );
+                        if ( !resultList.contains( email.trim( ) ) )
+                        {
+                            resultList.add( email.trim( ) );
+                        }
                     }
                 }
-
             }
-
         }
 
         return resultList;

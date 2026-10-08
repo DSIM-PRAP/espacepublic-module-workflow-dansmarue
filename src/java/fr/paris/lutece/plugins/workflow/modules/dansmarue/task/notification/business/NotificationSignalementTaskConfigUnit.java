@@ -55,6 +55,9 @@ public class NotificationSignalementTaskConfigUnit extends TaskConfig
     /** The type signalement. */
     private TypeSignalement _typeSignalement = new TypeSignalement( );
 
+    /** The id arrondissement. */
+    private Integer _nIdArrondissement;
+
     /**
      * return the destinataires of the notification.
      *
@@ -116,6 +119,16 @@ public class NotificationSignalementTaskConfigUnit extends TaskConfig
     public void setTypeSignalement( TypeSignalement typeSignalement )
     {
         this._typeSignalement = typeSignalement;
+    }
+
+    public Integer getIdArrondissement( )
+    {
+        return _nIdArrondissement;
+    }
+
+    public void setIdArrondissement( Integer nIdArrondissement )
+    {
+        _nIdArrondissement = nIdArrondissement;
     }
 
 }
